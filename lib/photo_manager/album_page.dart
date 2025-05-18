@@ -13,7 +13,7 @@ class AlbumPage extends StatelessWidget {
     return ChangeNotifierProvider<PhotoDataModel>(
       create: (_) {
         final model = PhotoDataModel();
-        model.loadDevicePhotos();
+        model.loadDeviceAlbumsAndPhotos();
         return model;
       },
       child: Scaffold(
@@ -46,8 +46,8 @@ class AlbumPage extends StatelessWidget {
                                   child: const Text('取消'),
                                 ),
                                 TextButton(
-                                  onPressed: () {
-                                    model.deleteSelected();
+                                  onPressed: () async {
+                                    await model.deleteSelected();
                                     Navigator.pop(ctx);
                                   },
                                   child: const Text('删除'),
@@ -64,41 +64,68 @@ class AlbumPage extends StatelessWidget {
             ),
           ],
         ),
-        body: Consumer<PhotoDataModel>(
-          builder: (context, model, _) {
-            if (model.photos.isEmpty) {
-              return const Center(child: Text('暂无照片'));
-            }
-            return Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 1,
-                ),
-                itemCount: model.photos.length,
-                itemBuilder: (context, index) {
-                  final photo = model.photos[index];
-                  return PhotoCardWidget(
-                    photo: photo,
-                    onTap: () => model.toggleSelect(photo.id),
-                    onPreview: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => PhotoPreviewPage(
-                            imageUrl: photo.url,
-                            title: photo.name,
-                          ),
-                        ),
+        body: Column(
+          children: [
+            Consumer<PhotoDataModel>(
+              builder: (context, model, _) {
+                if (model.albums.isEmpty) return const SizedBox.shrink();
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: DropdownButton(
+                    value: model.currentAlbum,
+                    isExpanded: true,
+                    items: model.albums.map((album) {
+                      return DropdownMenuItem(
+                        value: album,
+                        child: Text(album.name),
                       );
+                    }).toList(),
+                    onChanged: (album) async {
+                      if (album != null) await model.switchAlbum(album as dynamic);
                     },
+                  ),
+                );
+              },
+            ),
+            Expanded(
+              child: Consumer<PhotoDataModel>(
+                builder: (context, model, _) {
+                  if (model.photos.isEmpty) {
+                    return const Center(child: Text('暂无照片'));
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: GridView.builder(
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 1,
+                      ),
+                      itemCount: model.photos.length,
+                      itemBuilder: (context, index) {
+                        final photo = model.photos[index];
+                        return PhotoCardWidget(
+                          photo: photo,
+                          onTap: () => model.toggleSelect(photo.id),
+                          onPreview: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => PhotoPreviewPage(
+                                  imageUrl: photo.url,
+                                  title: photo.name,
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
                   );
                 },
               ),
-            );
-          },
+            ),
+          ],
         ),
         bottomNavigationBar: Consumer<PhotoDataModel>(
           builder: (context, model, _) {
@@ -110,7 +137,7 @@ class AlbumPage extends StatelessWidget {
                   children: [
                     Text('已选 ${model.selectedCount} 张, 共 ${model.selectedSize.toStringAsFixed(2)} MB'),
                     TextButton(
-                      onPressed: model.selectedCount > 0 ? model.deleteSelected : null,
+                      onPressed: model.selectedCount > 0 ? () async => await model.deleteSelected() : null,
                       child: const Text('删除选中'),
                     ),
                   ],

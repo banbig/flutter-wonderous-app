@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
+import 'dart:io';
 
 /// 照片大图预览页面，支持缩放和拖拽
 class PhotoPreviewPage extends StatelessWidget {
@@ -19,7 +20,9 @@ class PhotoPreviewPage extends StatelessWidget {
       ),
       body: Center(
         child: PhotoView(
-          imageProvider: NetworkImage(imageUrl),
+          imageProvider: imageUrl.startsWith('http')
+              ? NetworkImage(imageUrl)
+              : FileImage(File(imageUrl)) as ImageProvider,
           backgroundDecoration: const BoxDecoration(color: Colors.black),
           minScale: PhotoViewComputedScale.contained,
           maxScale: PhotoViewComputedScale.covered * 2.5,
