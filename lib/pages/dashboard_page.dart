@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/photo_data_provider.dart';
+import '../providers/navigation_provider.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({Key? key}) : super(key: key);
@@ -38,9 +41,9 @@ class DashboardPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () {
-                    // 跳转到清理页面
-                    Navigator.of(context).pushReplacementNamed('/clustering');
+                  onPressed: () async {
+                    await Provider.of<PhotoDataProvider>(context, listen: false).loadPhotosFromDevice();
+                    Provider.of<NavigationProvider>(context, listen: false).setPage(2); // 跳转到清理页
                   },
                   child: const Text('开始扫描与清理', style: TextStyle(fontSize: 18)),
                 ),
