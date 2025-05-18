@@ -1,70 +1,71 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'models/recommendation_settings.dart';
+import 'models/photo.dart';
+import 'models/photo_group.dart';
+import 'providers/navigation_provider.dart';
+import 'providers/photo_data_provider.dart';
+import 'providers/recommendation_settings_provider.dart';
 import 'pages/dashboard_page.dart';
-import 'photo_manager/photo_data_model.dart';
-import 'dart:developer' as developer;
-import 'package:file_picker/file_picker.dart';
+import 'pages/album_page.dart';
+import 'pages/clustering_page.dart';
+import 'pages/recommended_page.dart';
+import 'pages/settings_page.dart';
+import 'widgets/bottom_nav_bar.dart';
 
 void main() {
-  print('main() 启动');
-  runApp(const MyApp());
+  runApp(const App());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class App extends StatelessWidget {
+  const App({super.key});
 
   @override
   Widget build(BuildContext context) {
-    developer.log('MyApp build');
-    return ChangeNotifierProvider(
-      create: (_) => PhotoDataModel(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => NavigationProvider()),
+        ChangeNotifierProvider(create: (_) => PhotoDataProvider()),
+        ChangeNotifierProvider(create: (_) => RecommendationSettingsProvider()),
+      ],
       child: MaterialApp(
-        title: '智能照片管理',
+        title: '极简照片管家',
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+          brightness: Brightness.light,
+          primarySwatch: Colors.blue,
           useMaterial3: true,
-          scaffoldBackgroundColor: const Color(0xFFF6F7F9),
+          scaffoldBackgroundColor: Colors.white,
           appBarTheme: const AppBarTheme(
             backgroundColor: Colors.white,
             foregroundColor: Colors.black,
             elevation: 0,
-            centerTitle: true,
           ),
         ),
-        home: const DashboardPage(),
+        home: const MainScaffold(),
         debugShowCheckedModeBanner: false,
       ),
     );
   }
 }
 
-class FilePickerTestPage extends StatelessWidget {
-  const FilePickerTestPage({Key? key}) : super(key: key);
+class MainScaffold extends StatelessWidget {
+  const MainScaffold({super.key});
 
   @override
   Widget build(BuildContext context) {
-    developer.log('FilePickerTestPage build');
+    final navProvider = Provider.of<NavigationProvider>(context);
+    final pages = const [
+      DashboardPage(),
+      AlbumPage(),
+      ClusteringPage(),
+      RecommendedPage(),
+      SettingsPage(),
+    ];
     return Scaffold(
-      appBar: AppBar(title: const Text('file_picker 测试')),
-      body: Center(
-        child: ElevatedButton(
-          child: const Text('选择文件夹'),
-          onPressed: () async {
-            developer.log('点击按钮');
-            try {
-              String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
-              developer.log('选择结果: $selectedDirectory');
-              if (selectedDirectory == null) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('未选择文件夹')));
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('选择了: $selectedDirectory')));
-              }
-            } catch (e, stack) {
-              developer.log('选择文件夹异常: $e', error: e, stackTrace: stack);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('异常: $e')));
-            }
-          },
-        ),
+      body: pages[navProvider.currentPageIndex],
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: navProvider.currentPageIndex,
+        onTap: (index) => navProvider.setPage(index),
       ),
     );
   }

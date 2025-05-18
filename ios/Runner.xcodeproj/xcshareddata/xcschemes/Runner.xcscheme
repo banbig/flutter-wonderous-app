@@ -38,12 +38,13 @@
       </MacroExpansion>
       <Testables>
          <TestableReference
-            skipped = "NO">
+            skipped = "NO"
+            parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "E214FC8127C5A18D005F78FB"
-               BuildableName = "wondersUITests.xctest"
-               BlueprintName = "wondersUITests"
+               BlueprintIdentifier = "331C8080294A63A400263BE5"
+               BuildableName = "RunnerTests.xctest"
+               BlueprintName = "RunnerTests"
                ReferencedContainer = "container:Runner.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -58,6 +59,7 @@
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
+      enableGPUValidationMode = "1"
       allowLocationSimulation = "YES">
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
