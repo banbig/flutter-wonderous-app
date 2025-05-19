@@ -28,5 +28,9 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>需要访问您的文档以导入图片</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>需要访问您的下载文件夹以导入图片</string>
 </dict>
 </plist>
