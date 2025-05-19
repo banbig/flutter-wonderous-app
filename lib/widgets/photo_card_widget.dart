@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/photo.dart';
+import 'dart:io';
 
 class PhotoCardWidget extends StatelessWidget {
   final Photo photo;
@@ -32,8 +33,8 @@ class PhotoCardWidget extends StatelessWidget {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                photo.url,
+              child: Image.file(
+                File(photo.url),
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,
