@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/photo_data_provider.dart';
-import '../providers/recommendation_settings_provider.dart';
 import '../models/photo_group.dart';
 import '../models/photo.dart';
-import '../models/recommendation_settings.dart';
 import '../widgets/photo_group_widget.dart';
+import '../presentation/providers/settings_view_provider.dart';
 
 class ClusteringPage extends StatelessWidget {
   const ClusteringPage({Key? key}) : super(key: key);
@@ -13,7 +12,7 @@ class ClusteringPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final photoProvider = context.watch<PhotoDataProvider>();
-    final settingsProvider = context.watch<RecommendationSettingsProvider>();
+    final settings = context.watch<SettingsViewProvider>().settings;
     final groups = photoProvider.photoGroups;
     final selected = photoProvider.selectedPhotos;
     final totalPhotos = groups.fold<int>(0, (sum, g) => sum + g.photos.length);
@@ -35,18 +34,6 @@ class ClusteringPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('发现 ${groups.length} 组, 共 $totalPhotos 张照片', style: const TextStyle(fontSize: 16)),
-                Row(
-                  children: [
-                    const Text('智能选择', style: TextStyle(fontSize: 14)),
-                    Switch(
-                      value: settingsProvider.settings.smartSelectEnabled,
-                      onChanged: (v) {
-                        settingsProvider.updateSmartSelect(v);
-                        photoProvider.updateRecommendationAndSmartSelect(settingsProvider.settings);
-                      },
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -58,11 +45,11 @@ class ClusteringPage extends StatelessWidget {
                 return PhotoGroupWidget(
                   group: group,
                   selectedPhotoIds: selected,
-                  settings: settingsProvider.settings,
+                  settings: settings,
                   onPhotoSelect: (photoId, selected) {
                     photoProvider.selectPhoto(photoId, selected);
                   },
-                  getBestPhotos: (photos) => photoProvider.getBestPhotosInGroup(photos, settingsProvider.settings),
+                  getBestPhotos: (photos) => photoProvider.getBestPhotosInGroup(photos, settings),
                 );
               },
             ),

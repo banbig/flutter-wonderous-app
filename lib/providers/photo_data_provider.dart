@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/photo.dart';
 import '../models/photo_group.dart';
-import '../models/recommendation_settings.dart';
+import '../domain/entities/recommendation_settings.dart';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:intl/intl.dart';
@@ -115,20 +115,20 @@ class PhotoDataProvider extends ChangeNotifier {
 
   double calculateRecommendationScore(Photo photo, RecommendationSettings settings) {
     double score = 0;
-    if (settings.enabledCriteria['clarity'] == true) {
-      score += photo.clarity * (settings.weights['clarity'] ?? 1.0);
+    if (settings.criteria['clarity']?.enabled == true) {
+      score += photo.clarity * (settings.criteria['clarity']?.weight ?? 1.0);
     }
-    if (settings.enabledCriteria['exposure'] == true) {
-      score += photo.exposure * (settings.weights['exposure'] ?? 1.0);
+    if (settings.criteria['exposure']?.enabled == true) {
+      score += photo.exposure * (settings.criteria['exposure']?.weight ?? 1.0);
     }
-    if (settings.enabledCriteria['faces'] == true) {
-      score += photo.faces * (settings.weights['faces'] ?? 1.0);
+    if (settings.criteria['faces']?.enabled == true) {
+      score += photo.faces * (settings.criteria['faces']?.weight ?? 1.0);
     }
-    if (settings.enabledCriteria['composition'] == true) {
-      score += photo.composition * (settings.weights['composition'] ?? 1.0);
+    if (settings.criteria['composition']?.enabled == true) {
+      score += photo.composition * (settings.criteria['composition']?.weight ?? 1.0);
     }
-    if (settings.enabledCriteria['colorfulness'] == true) {
-      score += photo.colorfulness * (settings.weights['colorfulness'] ?? 1.0);
+    if (settings.criteria['colorfulness']?.enabled == true) {
+      score += photo.colorfulness * (settings.criteria['colorfulness']?.weight ?? 1.0);
     }
     return score;
   }
@@ -139,7 +139,7 @@ class PhotoDataProvider extends ChangeNotifier {
     if (settings.mode == RecommendationMode.singleBest) {
       return sorted.isNotEmpty ? [sorted.first] : [];
     } else {
-      int n = settings.topN.clamp(1, 5);
+      int n = settings.topNValue.clamp(1, 5);
       return sorted.take(n).toList();
     }
   }
@@ -159,10 +159,6 @@ class PhotoDataProvider extends ChangeNotifier {
 
   void updateRecommendationAndSmartSelect(RecommendationSettings settings) {
     calculateRecommendationScores(settings);
-    if (settings.smartSelectEnabled) {
-      smartSelect(settings);
-    } else {
-      clearSelectedPhotos();
-    }
+    smartSelect(settings);
   }
 } 

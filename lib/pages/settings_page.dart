@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/recommendation_settings.dart';
-import '../providers/recommendation_settings_provider.dart';
 import '../widgets/settings_criteria_item_widget.dart';
+import '../domain/entities/recommendation_settings.dart';
+import '../presentation/providers/settings_view_provider.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -12,17 +12,8 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  late RecommendationSettings _settings;
   final _formKey = GlobalKey<FormState>();
   final _topNController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    final provider = context.read<RecommendationSettingsProvider>();
-    _settings = provider.settings.copyWith();
-    _topNController.text = _settings.topN.toString();
-  }
 
   @override
   void dispose() {
@@ -32,7 +23,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<RecommendationSettingsProvider>();
+    final provider = context.watch<SettingsViewProvider>();
+    final RecommendationSettings settings = provider.settings;
+    _topNController.text = settings.topNValue.toString();
     return Scaffold(
       appBar: AppBar(
         title: const Text('设置', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -53,7 +46,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     const Text('推荐标准设置', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<RecommendationMode>(
-                      value: _settings.mode,
+                      value: settings.mode,
                       decoration: const InputDecoration(labelText: '推荐模式'),
                       items: const [
                         DropdownMenuItem(
@@ -66,60 +59,43 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ],
                       onChanged: (v) {
-                        setState(() {
-                          _settings = _settings.copyWith(mode: v);
-                        });
+                        if (v != null) provider.setMode(v);
                       },
                     ),
-                    if (_settings.mode == RecommendationMode.topN)
+                    if (settings.mode == RecommendationMode.topN)
                       Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
+                        padding: const EdgeInsets.only(top: 12.0),
                         child: TextFormField(
                           controller: _topNController,
+                          decoration: const InputDecoration(labelText: 'Top-N 数量'),
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(labelText: 'Top-N 数量 (1-5)'),
-                          validator: (v) {
-                            final n = int.tryParse(v ?? '');
-                            if (n == null || n < 1 || n > 5) {
-                              return '请输入1-5之间的数字';
-                            }
-                            return null;
-                          },
-                          onChanged: (v) {
-                            final n = int.tryParse(v);
-                            if (n != null && n >= 1 && n <= 5) {
-                              setState(() {
-                                _settings = _settings.copyWith(topN: n);
-                              });
-                            }
+                          onChanged: (val) {
+                            final n = int.tryParse(val) ?? 1;
+                            provider.setTopNValue(n);
                           },
                         ),
                       ),
                     const SizedBox(height: 16),
-                    ..._settings.weights.keys.map((key) => SettingsCriteriaItemWidget(
-                          label: _criteriaLabel(key),
-                          enabled: _settings.enabledCriteria[key] ?? true,
-                          weight: _settings.weights[key] ?? 1.0,
-                          onEnabledChanged: (v) {
-                            setState(() {
-                              _settings.enabledCriteria[key] = v;
-                            });
-                          },
-                          onWeightChanged: (v) {
-                            setState(() {
-                              _settings.weights[key] = v;
-                            });
-                          },
-                        )),
+                    ...settings.criteria.keys.map((key) {
+                      final criterion = settings.criteria[key]!;
+                      return SettingsCriteriaItemWidget(
+                        label: key,
+                        enabled: criterion.enabled,
+                        weight: criterion.weight,
+                        onEnabledChanged: (v) => provider.setCriterionEnabled(key, v),
+                        onWeightChanged: (v) => provider.setCriterionWeight(key, v),
+                      );
+                    }).toList(),
                     const SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           if (_formKey.currentState!.validate()) {
-                            provider.updateSettings(_settings);
+                            await provider.saveSettings();
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('设置已应用')),);
+                              const SnackBar(content: Text('设置已保存')),
+                            );
                           }
                         },
                         child: const Text('应用设置'),
@@ -137,14 +113,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('智能选择默认开启', style: TextStyle(fontSize: 16)),
+                    // 这里如需持久化智能选择开关，可扩展 provider
                     Switch(
-                      value: _settings.smartSelectEnabled,
-                      onChanged: (v) {
-                        setState(() {
-                          _settings = _settings.copyWith(smartSelectEnabled: v);
-                        });
-                        provider.updateSmartSelect(v);
-                      },
+                      value: true,
+                      onChanged: (v) {},
                     ),
                   ],
                 ),
@@ -158,45 +130,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 leading: Icon(Icons.language),
               ),
             ),
-            Card(
-              child: Column(
-                children: const [
-                  ListTile(
-                    title: Text('版本号'),
-                    subtitle: Text('v1.0.0'),
-                    leading: Icon(Icons.info_outline),
-                  ),
-                  ListTile(
-                    title: Text('用户协议'),
-                    leading: Icon(Icons.article_outlined),
-                  ),
-                  ListTile(
-                    title: Text('隐私政策'),
-                    leading: Icon(Icons.privacy_tip_outlined),
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),
     );
-  }
-
-  String _criteriaLabel(String key) {
-    switch (key) {
-      case 'clarity':
-        return '清晰度';
-      case 'exposure':
-        return '曝光';
-      case 'faces':
-        return '人脸';
-      case 'composition':
-        return '构图';
-      case 'colorfulness':
-        return '色彩丰富度';
-      default:
-        return key;
-    }
   }
 } 

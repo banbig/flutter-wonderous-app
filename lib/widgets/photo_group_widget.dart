@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/photo_group.dart';
 import '../models/photo.dart';
-import '../models/recommendation_settings.dart';
+import '../domain/entities/recommendation_settings.dart';
 import 'photo_card_widget.dart';
 
 class PhotoGroupWidget extends StatelessWidget {

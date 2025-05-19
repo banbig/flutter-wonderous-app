@@ -28,7 +28,7 @@ class ClusteringViewProvider extends ChangeNotifier {
     isLoading = true;
     error = null;
     notifyListeners();
-    final result = await photoRepository.getPhotoGroups();
+    final result = await photoRepository.getPhotoGroups(settings: settingsProvider.settings);
     result.fold((failure) {
       error = failure.message;
       displayedGroups = [];

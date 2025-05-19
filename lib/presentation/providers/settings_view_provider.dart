@@ -4,7 +4,9 @@ import '../../domain/repositories/i_settings_repository.dart';
 
 class SettingsViewProvider extends ChangeNotifier {
   final ISettingsRepository repository;
-  SettingsViewProvider({required this.repository});
+  SettingsViewProvider({required this.repository}) {
+    loadSettings();
+  }
 
   RecommendationSettings _settings = RecommendationSettings();
   RecommendationSettings get settings => _settings;
@@ -36,17 +38,20 @@ class SettingsViewProvider extends ChangeNotifier {
 
   void setMode(RecommendationMode mode) {
     _settings.mode = mode;
+    saveSettings();
     notifyListeners();
   }
 
   void setTopNValue(int value) {
     _settings.topNValue = value;
+    saveSettings();
     notifyListeners();
   }
 
   void setCriterionEnabled(String key, bool enabled) {
     if (_settings.criteria.containsKey(key)) {
       _settings.criteria[key]!.enabled = enabled;
+      saveSettings();
       notifyListeners();
     }
   }
@@ -54,6 +59,7 @@ class SettingsViewProvider extends ChangeNotifier {
   void setCriterionWeight(String key, double weight) {
     if (_settings.criteria.containsKey(key)) {
       _settings.criteria[key]!.weight = weight;
+      saveSettings();
       notifyListeners();
     }
   }

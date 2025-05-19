@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'models/recommendation_settings.dart';
 import 'models/photo.dart';
 import 'models/photo_group.dart';
 import 'providers/navigation_provider.dart';
 import 'providers/photo_data_provider.dart';
-import 'providers/recommendation_settings_provider.dart';
 import 'pages/dashboard_page.dart';
 import 'pages/album_page.dart';
 import 'pages/clustering_page.dart';
@@ -49,7 +47,6 @@ void main() {
           ),
         ),
         ChangeNotifierProvider(create: (_) => PhotoDataProvider()),
-        ChangeNotifierProvider(create: (_) => RecommendationSettingsProvider()),
       ],
       child: MaterialApp(
         title: 'Wonderous Photo App',

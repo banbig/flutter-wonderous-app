@@ -6,13 +6,15 @@ import '../data_sources/local/local_photo_data_source.dart';
 import '../../domain/use_cases/photo_analysis/calculate_similarity_use_case.dart';
 import '../../domain/use_cases/collection_management/cluster_similar_photos_use_case.dart';
 import '../../domain/entities/photo.dart';
+import '../../domain/use_cases/collection_management/get_photo_recommendations_use_case.dart';
+import '../../domain/entities/recommendation_settings.dart';
 
 class PhotoRepositoryImpl implements IPhotoRepository {
   final LocalPhotoDataSource localDataSource;
   PhotoRepositoryImpl({required this.localDataSource});
 
   @override
-  Future<Either<Failure, List<PhotoGroup>>> getPhotoGroups() async {
+  Future<Either<Failure, List<PhotoGroup>>> getPhotoGroups({required RecommendationSettings settings}) async {
     try {
       // 1. 优先从数据库读取
       final cachedPhotos = await localDataSource.getCachedPhotos();
@@ -35,14 +37,20 @@ class PhotoRepositoryImpl implements IPhotoRepository {
       final similarityUseCase = CalculateSimilarityUseCase();
       final clusterUseCase = ClusterSimilarPhotosUseCase();
       final similarityResult = await similarityUseCase.call(photos);
-      final similarityData = similarityResult.fold((l) => <SimilarityPair>[], (r) => r as List<SimilarityPair>);
+      final similarityData = similarityResult.fold((l) => [], (r) => r).cast<SimilarityPair>();
       final clusterResult = await clusterUseCase.call(ClusterParams(photos: photos, similarityData: similarityData));
-      final photoGroups = clusterResult.fold((l) => <PhotoGroup>[], (r) => r as List<PhotoGroup>);
+      final photoGroups = clusterResult.fold((l) => [], (r) => r).cast<PhotoGroup>();
       // 推荐分数和最佳标记
+      final GetPhotoRecommendationsUseCase getPhotoRecommendationsUseCase = GetPhotoRecommendationsUseCase();
       for (var group in photoGroups) {
-        // 这里可注入GetPhotoRecommendationsUseCase
+        await getPhotoRecommendationsUseCase.call(
+          GetRecommendationsParams(
+            photosInGroup: group.photos,
+            settings: settings,
+          ),
+        );
       }
-      // 缓存到数据库
+      // 缓存到数据库（含分数和isBestCandidate）
       await localDataSource.cachePhotos(photos);
       return Right(photoGroups);
     } catch (e) {
