@@ -22,9 +22,9 @@ class PhotoRepositoryImpl implements IPhotoRepository {
       final similarityUseCase = CalculateSimilarityUseCase();
       final clusterUseCase = ClusterSimilarPhotosUseCase();
       final similarityResult = await similarityUseCase.call(photos);
-      final similarityData = similarityResult.fold((l) => [], (r) => r);
+      final List<SimilarityPair> similarityData = similarityResult.fold((l) => <SimilarityPair>[], (r) => r);
       final clusterResult = await clusterUseCase.call(ClusterParams(photos: photos, similarityData: similarityData));
-      final photoGroups = clusterResult.fold((l) => [], (r) => r);
+      final List<PhotoGroup> photoGroups = clusterResult.fold((l) => <PhotoGroup>[], (r) => r);
       return Right(photoGroups);
     } catch (e) {
       return Left(CacheFailure('获取照片分组失败'));

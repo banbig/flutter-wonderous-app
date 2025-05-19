@@ -19,7 +19,6 @@ import 'data/data_sources/local/local_photo_data_source.dart';
 import 'data/repositories_impl/settings_repository_impl.dart';
 import 'data/repositories_impl/photo_repository_impl.dart';
 import 'domain/use_cases/collection_management/get_photo_recommendations_use_case.dart';
-import 'presentation/screens/main_screen.dart';
 import 'domain/use_cases/storage_management/cleanup_photos_use_case.dart';
 
 void main() {
@@ -52,35 +51,26 @@ void main() {
         ChangeNotifierProvider(create: (_) => PhotoDataProvider()),
         ChangeNotifierProvider(create: (_) => RecommendationSettingsProvider()),
       ],
-      child: MyApp(),
+      child: MaterialApp(
+        title: 'Wonderous Photo App',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          useMaterial3: true,
+          fontFamily: 'Inter',
+          scaffoldBackgroundColor: Color(0xFFF3F4F6),
+        ),
+        home: MainScaffold(),
+        debugShowCheckedModeBanner: false,
+      ),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Wonderous Photo App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-        fontFamily: 'Inter',
-        scaffoldBackgroundColor: Color(0xFFF3F4F6),
-      ),
-      home: MainScreen(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
-
 class MainScaffold extends StatelessWidget {
-  const MainScaffold({super.key});
-
   @override
   Widget build(BuildContext context) {
-    final navProvider = Provider.of<NavigationProvider>(context);
-    final pages = const [
+    final currentIndex = Provider.of<NavigationProvider>(context, listen: true).currentPageIndex;
+    final List<Widget> screens = [
       DashboardPage(),
       AlbumPage(),
       ClusteringPage(),
@@ -88,11 +78,15 @@ class MainScaffold extends StatelessWidget {
       SettingsPage(),
     ];
     return Scaffold(
-      body: pages[navProvider.currentPageIndex],
+      body: IndexedStack(
+        index: currentIndex,
+        children: screens,
+      ),
       bottomNavigationBar: BottomNavBar(
-        currentIndex: navProvider.currentPageIndex,
-        onTap: (index) => navProvider.setPage(index),
+        currentIndex: currentIndex,
+        onTap: (index) => Provider.of<NavigationProvider>(context, listen: false).setPage(index),
       ),
     );
   }
 }
+

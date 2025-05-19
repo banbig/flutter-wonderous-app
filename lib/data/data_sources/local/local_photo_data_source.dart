@@ -2,6 +2,8 @@ import '../../../domain/entities/photo_group.dart';
 import '../../../domain/entities/photo.dart';
 import 'dart:math';
 import '../../../domain/use_cases/photo_acquisition/scan_device_photos_use_case.dart';
+import '../../../core/platform_services/photo_gallery_service.dart';
+import '../../../core/usecase/usecase.dart';
 
 abstract class LocalPhotoDataSource {
   Future<List<PhotoGroup>> getMockPhotoGroups();

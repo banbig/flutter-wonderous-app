@@ -1,6 +1,8 @@
+import '../../../core/error/failures.dart';
 import '../../../core/usecase/usecase.dart';
 import '../../entities/photo.dart';
 import 'package:dartz/dartz.dart';
+import 'dart:math';
 
 class SimilarityPair {
   final Photo photoA;
@@ -11,7 +13,7 @@ class SimilarityPair {
 
 class CalculateSimilarityUseCase implements UseCase<List<SimilarityPair>, List<Photo>> {
   @override
-  Future<Either<void, List<SimilarityPair>>> call(List<Photo> photos) async {
+  Future<Either<Failure, List<SimilarityPair>>> call(List<Photo> photos) async {
     List<SimilarityPair> pairs = [];
     for (int i = 0; i < photos.length; i++) {
       for (int j = i + 1; j < photos.length; j++) {
@@ -29,7 +31,7 @@ class CalculateSimilarityUseCase implements UseCase<List<SimilarityPair>, List<P
         if (a.latitude != null && b.latitude != null && a.longitude != null && b.longitude != null) {
           final dLat = a.latitude! - b.latitude!;
           final dLon = a.longitude! - b.longitude!;
-          final dist = (dLat * dLat + dLon * dLon).sqrt();
+          final dist = sqrt(dLat * dLat + dLon * dLon);
           if (dist < 0.01) {
             score += 1.0 - (dist / 0.01); // 0~1
           }

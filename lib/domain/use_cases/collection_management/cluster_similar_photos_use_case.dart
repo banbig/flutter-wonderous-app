@@ -1,3 +1,4 @@
+import '../../../core/error/failures.dart';
 import '../../../core/usecase/usecase.dart';
 import '../../entities/photo.dart';
 import '../../entities/photo_group.dart';
@@ -12,7 +13,7 @@ class ClusterParams {
 
 class ClusterSimilarPhotosUseCase implements UseCase<List<PhotoGroup>, ClusterParams> {
   @override
-  Future<Either<void, List<PhotoGroup>>> call(ClusterParams params) async {
+  Future<Either<Failure, List<PhotoGroup>>> call(ClusterParams params) async {
     final photos = List<Photo>.from(params.photos);
     final List<PhotoGroup> groups = [];
     final Set<String> clustered = {};

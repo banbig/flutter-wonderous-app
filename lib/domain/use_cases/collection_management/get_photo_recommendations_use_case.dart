@@ -1,3 +1,4 @@
+import '../../../core/error/failures.dart';
 import '../../../core/usecase/usecase.dart';
 import 'package:dartz/dartz.dart';
 import '../../entities/photo.dart';
@@ -11,7 +12,7 @@ class GetRecommendationsParams {
 
 class GetPhotoRecommendationsUseCase implements UseCase<List<Photo>, GetRecommendationsParams> {
   @override
-  Future<Either<void, List<Photo>>> call(GetRecommendationsParams params) async {
+  Future<Either<Failure, List<Photo>>> call(GetRecommendationsParams params) async {
     final photos = params.photosInGroup;
     final settings = params.settings;
     // 计算分数
