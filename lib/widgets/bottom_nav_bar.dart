@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -12,6 +13,7 @@ class BottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
       currentIndex: currentIndex,
@@ -19,26 +21,26 @@ class BottomNavBar extends StatelessWidget {
       selectedItemColor: Theme.of(context).primaryColor,
       unselectedItemColor: Colors.grey,
       showUnselectedLabels: true,
-      items: const [
+      items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.dashboard_outlined),
-          label: '首页',
+          icon: const Icon(Icons.dashboard_outlined),
+          label: localizations.home,
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.photo_library_outlined),
-          label: '相册',
+          icon: const Icon(Icons.photo_library_outlined),
+          label: localizations.album,
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.cleaning_services_outlined),
-          label: '清理',
+          icon: const Icon(Icons.cleaning_services_outlined),
+          label: localizations.clustering,
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.recommend_outlined),
-          label: '推荐',
+          icon: const Icon(Icons.recommend_outlined),
+          label: localizations.recommend,
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.settings_outlined),
-          label: '设置',
+          icon: const Icon(Icons.settings_outlined),
+          label: localizations.settings,
         ),
       ],
       backgroundColor: Colors.white,

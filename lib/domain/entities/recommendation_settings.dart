@@ -17,7 +17,7 @@ class RecommendationSettings {
     Map<String, RecommendationCriterion>? criteria,
   }) : criteria = criteria ?? {
     'clarity': RecommendationCriterion(enabled: true, weight: 1.0),
-    'exposure': RecommendationCriterion(enabled: true, weight: 1.0),
+    '曝光': RecommendationCriterion(enabled: true, weight: 1.0),
     'faces': RecommendationCriterion(enabled: true, weight: 1.0),
     'composition': RecommendationCriterion(enabled: true, weight: 1.0),
     'colorfulness': RecommendationCriterion(enabled: true, weight: 1.0),

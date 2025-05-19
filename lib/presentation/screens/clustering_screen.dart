@@ -1,80 +1,88 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/clustering_view_provider.dart';
-import '../widgets/photo_group_widget.dart';
+import '../../providers/photo_data_provider.dart';
+import '../../models/photo_group.dart';
+import '../../models/photo.dart';
+import '../../widgets/photo_group_widget.dart';
+import '../../presentation/providers/settings_view_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ClusteringScreen extends StatelessWidget {
+  const ClusteringScreen({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Consumer<ClusteringViewProvider>(
-      builder: (context, provider, _) {
-        if (provider.isLoading) {
-          return Scaffold(
-            appBar: AppBar(title: Text('清理')),
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-        if (provider.error != null) {
-          return Scaffold(
-            appBar: AppBar(title: Text('清理')),
-            body: Center(child: Text(provider.error!)),
-          );
-        }
-        return Scaffold(
-          appBar: AppBar(title: Text('清理')),
-          body: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('发现 ${provider.displayedGroups.length} 组照片'),
-                    Row(
-                      children: [
-                        Text('智能选择'),
-                        Switch(
-                          value: provider.isSmartSelectEnabled,
-                          onChanged: provider.setSmartSelectEnabled,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: provider.displayedGroups.length,
-                  itemBuilder: (context, index) {
-                    final group = provider.displayedGroups[index];
-                    return PhotoGroupWidget(
-                      photoGroup: group,
-                      selectedPhotoIds: provider.selectedPhotoIds,
-                      onPhotoTap: provider.togglePhotoSelection,
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-          bottomNavigationBar: Container(
-            color: Colors.white,
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    final localizations = AppLocalizations.of(context)!;
+    final photoProvider = context.watch<PhotoDataProvider>();
+    final settings = context.watch<SettingsViewProvider>().settings;
+    final groups = photoProvider.photoGroups;
+    final selected = photoProvider.selectedPhotos;
+    final totalPhotos = groups.fold<int>(0, (sum, g) => sum + g.photos.length);
+    final totalSelected = selected.length;
+    final totalSelectedSize = groups
+        .expand((g) => g.photos)
+        .where((p) => selected.contains(p.id))
+        .fold<double>(0, (sum, p) => sum + p.size);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(localizations.cleanTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+        centerTitle: true,
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('已选 ${provider.selectedPhotoIds.length} 张'),
+                Text(localizations.cleanFoundGroups(groups.length, totalPhotos), style: const TextStyle(fontSize: 16)),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: groups.length,
+              itemBuilder: (context, idx) {
+                final group = groups[idx];
+                return PhotoGroupWidget(
+                  group: group,
+                  selectedPhotoIds: selected,
+                  settings: settings,
+                  onPhotoSelect: (photoId, selected) {
+                    photoProvider.selectPhoto(photoId, selected);
+                  },
+                  getBestPhotos: (photos) => photoProvider.getBestPhotosInGroup(photos, settings),
+                );
+              },
+            ),
+          ),
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(localizations.cleanSelected(totalSelected, totalSelectedSize.toStringAsFixed(2)), style: const TextStyle(fontSize: 16)),
                 ElevatedButton(
-                  onPressed: provider.selectedPhotoIds.isNotEmpty && !provider.isLoading
-                      ? () => provider.performCleanup(context)
-                      : null,
-                  child: Text('立即清理'),
+                  onPressed: totalSelected == 0
+                      ? null
+                      : () {
+                          photoProvider.cleanSelectedPhotos();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(localizations.cleanDone)),
+                          );
+                        },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: Text(localizations.cleanNow),
                 ),
               ],
             ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 } 

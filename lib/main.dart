@@ -4,11 +4,11 @@ import 'models/photo.dart';
 import 'models/photo_group.dart';
 import 'providers/navigation_provider.dart';
 import 'providers/photo_data_provider.dart';
-import 'pages/dashboard_page.dart';
-import 'pages/album_page.dart';
-import 'pages/clustering_page.dart';
-import 'pages/recommended_page.dart';
-import 'pages/settings_page.dart';
+// import 'pages/dashboard_page.dart';
+// import 'pages/album_page.dart';
+// import 'pages/clustering_page.dart';
+// import 'pages/recommended_page.dart';
+// import 'pages/settings_page.dart';
 import 'widgets/bottom_nav_bar.dart';
 import 'presentation/providers/settings_view_provider.dart';
 import 'presentation/providers/clustering_view_provider.dart';
@@ -18,8 +18,19 @@ import 'data/repositories_impl/settings_repository_impl.dart';
 import 'data/repositories_impl/photo_repository_impl.dart';
 import 'domain/use_cases/collection_management/get_photo_recommendations_use_case.dart';
 import 'domain/use_cases/storage_management/cleanup_photos_use_case.dart';
+import 'package:logger/logger.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart';
+import 'providers/locale_provider.dart';
+import 'presentation/screens/dashboard_screen.dart';
+import 'presentation/screens/album_screen.dart';
+import 'presentation/screens/clustering_screen.dart';
+import 'presentation/screens/recommended_screen.dart';
+import 'presentation/screens/settings_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() {
+  Logger.level = Level.debug;
   final localSettingsDataSource = LocalSettingsDataSourceImpl();
   final settingsRepository = SettingsRepositoryImpl(localDataSource: localSettingsDataSource);
   final localPhotoDataSource = LocalPhotoDataSourceImpl();
@@ -47,17 +58,33 @@ void main() {
           ),
         ),
         ChangeNotifierProvider(create: (_) => PhotoDataProvider()),
+        ChangeNotifierProvider(create: (_) => LocaleProvider()),
       ],
-      child: MaterialApp(
-        title: 'Wonderous Photo App',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          useMaterial3: true,
-          fontFamily: 'Inter',
-          scaffoldBackgroundColor: Color(0xFFF3F4F6),
-        ),
-        home: MainScaffold(),
-        debugShowCheckedModeBanner: false,
+      child: Consumer<LocaleProvider>(
+        builder: (context, localeProvider, child) {
+          return MaterialApp(
+            title: 'Wonderous Photo App',
+            theme: ThemeData(
+              primarySwatch: Colors.blue,
+              useMaterial3: true,
+              fontFamily: 'Inter',
+              scaffoldBackgroundColor: Color(0xFFF3F4F6),
+            ),
+            home: MainScaffold(),
+            debugShowCheckedModeBanner: false,
+            locale: localeProvider.locale,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [
+              Locale('zh', 'CN'),
+              Locale('en', 'US'),
+            ],
+          );
+        },
       ),
     ),
   );
@@ -68,11 +95,11 @@ class MainScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final currentIndex = Provider.of<NavigationProvider>(context, listen: true).currentPageIndex;
     final List<Widget> screens = [
-      DashboardPage(),
-      AlbumPage(),
-      ClusteringPage(),
-      RecommendedPage(),
-      SettingsPage(),
+      DashboardScreen(),
+      AlbumScreen(),
+      ClusteringScreen(),
+      RecommendedScreen(),
+      SettingsScreen(),
     ];
     return Scaffold(
       body: IndexedStack(

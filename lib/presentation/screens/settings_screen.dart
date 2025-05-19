@@ -2,133 +2,183 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/settings_view_provider.dart';
 import '../../domain/entities/recommendation_settings.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../providers/locale_provider.dart';
+import '../../widgets/settings_criteria_item_widget.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({Key? key}) : super(key: key);
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _topNController = TextEditingController();
+
+  @override
+  void dispose() {
+    _topNController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    Locale currentLocale = Localizations.localeOf(context);
     return Consumer<SettingsViewProvider>(
       builder: (context, provider, _) {
+        final RecommendationSettings settings = provider.settings;
+        _topNController.text = settings.topNValue.toString();
         return Scaffold(
-          appBar: AppBar(title: Text('设置')),
-          body: ListView(
-            padding: EdgeInsets.all(16),
-            children: [
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('推荐标准设置', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      SizedBox(height: 16),
-                      DropdownButtonFormField<RecommendationMode>(
-                        value: provider.currentMode,
-                        decoration: InputDecoration(labelText: '推荐模式'),
-                        items: [
-                          DropdownMenuItem(
-                            value: RecommendationMode.singleBest,
-                            child: Text('单张最佳'),
+          appBar: AppBar(title: Text(localizations.settingsTitle)),
+          body: Form(
+            key: _formKey,
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                Card(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(localizations.recommendationCriteria, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<RecommendationMode>(
+                          value: settings.mode,
+                          decoration: InputDecoration(labelText: localizations.recommendationMode),
+                          items: [
+                            DropdownMenuItem(
+                              value: RecommendationMode.singleBest,
+                              child: Text(localizations.singleBest),
+                            ),
+                            DropdownMenuItem(
+                              value: RecommendationMode.topN,
+                              child: Text(localizations.topN),
+                            ),
+                          ],
+                          onChanged: (v) {
+                            if (v != null) provider.setMode(v);
+                          },
+                        ),
+                        if (settings.mode == RecommendationMode.topN)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 12.0),
+                            child: TextFormField(
+                              controller: _topNController,
+                              decoration: InputDecoration(labelText: localizations.topNValue),
+                              keyboardType: TextInputType.number,
+                              validator: (val) {
+                                final n = int.tryParse(val ?? '');
+                                if (n == null || n < 1) {
+                                  return localizations.topNValue;
+                                }
+                                return null;
+                              },
+                              onChanged: (val) {
+                                final n = int.tryParse(val) ?? 1;
+                                provider.setTopNValue(n);
+                              },
+                            ),
                           ),
-                          DropdownMenuItem(
-                            value: RecommendationMode.topN,
-                            child: Text('Top-N'),
-                          ),
-                        ],
-                        onChanged: (mode) {
-                          if (mode != null) provider.setMode(mode);
-                        },
-                      ),
-                      if (provider.currentMode == RecommendationMode.topN)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 12.0),
-                          child: TextFormField(
-                            initialValue: provider.topNValue.toString(),
-                            decoration: InputDecoration(labelText: 'Top-N 数量'),
-                            keyboardType: TextInputType.number,
-                            onChanged: (val) {
-                              final n = int.tryParse(val) ?? 1;
-                              provider.setTopNValue(n);
+                        const SizedBox(height: 16),
+                        ...settings.criteria.keys.map((key) {
+                          final criterion = settings.criteria[key]!;
+                          return SettingsCriteriaItemWidget(
+                            label: _criterionName(key, localizations),
+                            enabled: criterion.enabled,
+                            weight: criterion.weight,
+                            onEnabledChanged: (v) => provider.setCriterionEnabled(key, v),
+                            onWeightChanged: (v) => provider.setCriterionWeight(key, v),
+                          );
+                        }).toList(),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              if (_formKey.currentState!.validate()) {
+                                await provider.saveSettings();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(localizations.applySettings)),
+                                );
+                              }
                             },
+                            child: Text(localizations.applySettings),
                           ),
                         ),
-                      SizedBox(height: 16),
-                      ...provider.settings.criteria.keys.map((key) {
-                        final criterion = provider.settings.criteria[key]!;
-                        return Row(
-                          children: [
-                            Expanded(child: Text(_criterionName(key))),
-                            Checkbox(
-                              value: criterion.enabled,
-                              onChanged: (v) => provider.setCriterionEnabled(key, v ?? false),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Slider(
-                                value: criterion.weight,
-                                min: 0.0,
-                                max: 2.0,
-                                divisions: 20,
-                                label: criterion.weight.toStringAsFixed(2),
-                                onChanged: criterion.enabled
-                                    ? (v) => provider.setCriterionWeight(key, v)
-                                    : null,
-                              ),
-                            ),
-                            SizedBox(width: 40, child: Text(criterion.weight.toStringAsFixed(2))),
-                          ],
-                        );
-                      }).toList(),
-                      SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () async {
-                          await provider.saveSettings();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('设置已保存')),
-                          );
-                        },
-                        child: Text('应用推荐设置'),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              Card(
-                child: ListTile(
-                  title: Text('智能选择默认开启'),
-                  trailing: Switch(value: true, onChanged: (_) {}),
+                Card(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  child: ListTile(
+                    title: Text(localizations.smartSelectDefault),
+                    trailing: Switch(value: true, onChanged: (_) {}),
+                  ),
                 ),
-              ),
-              Card(
-                child: ListTile(
-                  title: Text('语言'),
-                  subtitle: Text('简体中文'),
+                Card(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.language),
+                        const SizedBox(width: 12),
+                        Text(localizations.language),
+                        const Spacer(),
+                        DropdownButton<Locale>(
+                          value: currentLocale,
+                          items: [
+                            DropdownMenuItem(
+                              value: const Locale('zh', 'CN'),
+                              child: Text(localizations.chinese),
+                            ),
+                            DropdownMenuItem(
+                              value: const Locale('en', 'US'),
+                              child: Text(localizations.english),
+                            ),
+                          ],
+                          onChanged: (locale) {
+                            if (locale != null) {
+                              context.read<LocaleProvider>().setLocale(locale);
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-              Card(
-                child: ListTile(
-                  title: Text('版本号'),
-                  subtitle: Text('1.0.0'),
+                Card(
+                  child: ListTile(
+                    title: Text(localizations.version),
+                    subtitle: const Text('1.0.0'),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-  String _criterionName(String key) {
+  String _criterionName(String key, AppLocalizations localizations) {
     switch (key) {
       case 'clarity':
-        return '清晰度';
+        return localizations.clarity;
       case 'exposure':
-        return '曝光';
+        return localizations.exposure;
       case 'faces':
-        return '人脸数';
+        return localizations.faces;
       case 'composition':
-        return '构图';
+        return localizations.composition;
       case 'colorfulness':
-        return '色彩丰富度';
+        return localizations.colorfulness;
       default:
         return key;
     }
