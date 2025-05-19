@@ -12,38 +12,47 @@ import 'pages/clustering_page.dart';
 import 'pages/recommended_page.dart';
 import 'pages/settings_page.dart';
 import 'widgets/bottom_nav_bar.dart';
+// import 'presentation/screens/main_screen.dart';
+import 'presentation/providers/settings_view_provider.dart';
+import 'presentation/providers/clustering_view_provider.dart';
+import 'data/data_sources/local/local_settings_data_source.dart';
+import 'data/data_sources/local/local_photo_data_source.dart';
+import 'data/repositories_impl/settings_repository_impl.dart';
+import 'data/repositories_impl/photo_repository_impl.dart';
 
 void main() {
-  runApp(const App());
-}
+  final localSettingsDataSource = LocalSettingsDataSourceImpl();
+  final settingsRepository = SettingsRepositoryImpl(localDataSource: localSettingsDataSource);
+  final localPhotoDataSource = LocalPhotoDataSourceImpl();
+  final photoRepository = PhotoRepositoryImpl(localDataSource: localPhotoDataSource);
 
-class App extends StatelessWidget {
-  const App({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
+  runApp(
+    MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
+        ChangeNotifierProvider(create: (_) => SettingsViewProvider(repository: settingsRepository)),
+        ChangeNotifierProvider(create: (_) => ClusteringViewProvider(photoRepository: photoRepository)),
         ChangeNotifierProvider(create: (_) => PhotoDataProvider()),
         ChangeNotifierProvider(create: (_) => RecommendationSettingsProvider()),
       ],
-      child: MaterialApp(
-        title: '极简照片管家',
-        theme: ThemeData(
-          brightness: Brightness.light,
-          primarySwatch: Colors.blue,
-          useMaterial3: true,
-          scaffoldBackgroundColor: Colors.white,
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.black,
-            elevation: 0,
-          ),
-        ),
-        home: const MainScaffold(),
-        debugShowCheckedModeBanner: false,
+      child: MyApp(),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Wonderous Photo App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        useMaterial3: true,
+        fontFamily: 'Inter',
+        scaffoldBackgroundColor: Color(0xFFF3F4F6),
       ),
+      home: MainScaffold(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
