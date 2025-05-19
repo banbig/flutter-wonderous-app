@@ -13,18 +13,36 @@ class PhotoRepositoryImpl implements IPhotoRepository {
   @override
   Future<Either<Failure, List<PhotoGroup>>> getPhotoGroups() async {
     try {
-      final groups = await localDataSource.getMockPhotoGroups();
-      if (groups.isNotEmpty) {
-        return Right(groups);
+      // 1. 优先从数据库读取
+      final cachedPhotos = await localDataSource.getCachedPhotos();
+      if (cachedPhotos.isNotEmpty) {
+        // 简单按groupId分组（如未实现可按天分组）
+        final Map<String, List<Photo>> groupMap = {};
+        for (var photo in cachedPhotos) {
+          final key = photo.dateTimeOriginal?.toIso8601String().substring(0, 10) ?? '未知';
+          groupMap.putIfAbsent(key, () => []).add(photo);
+        }
+        final photoGroups = groupMap.entries.map((e) => PhotoGroup(
+          id: e.key,
+          date: e.value.first.dateTimeOriginal ?? DateTime.now(),
+          photos: e.value,
+        )).toList();
+        return Right(photoGroups);
       }
+      // 2. 若无缓存则扫描设备、聚类、推荐并缓存
       final photos = await localDataSource.fetchPhotosFromDevice();
-      // MVP8: 计算相似度和聚类分组
       final similarityUseCase = CalculateSimilarityUseCase();
       final clusterUseCase = ClusterSimilarPhotosUseCase();
       final similarityResult = await similarityUseCase.call(photos);
-      final List<SimilarityPair> similarityData = similarityResult.fold((l) => <SimilarityPair>[], (r) => r);
+      final similarityData = similarityResult.fold((l) => [], (r) => r);
       final clusterResult = await clusterUseCase.call(ClusterParams(photos: photos, similarityData: similarityData));
-      final List<PhotoGroup> photoGroups = clusterResult.fold((l) => <PhotoGroup>[], (r) => r);
+      final photoGroups = clusterResult.fold((l) => [], (r) => r);
+      // 推荐分数和最佳标记
+      for (var group in photoGroups) {
+        // 这里可注入GetPhotoRecommendationsUseCase
+      }
+      // 缓存到数据库
+      await localDataSource.cachePhotos(photos);
       return Right(photoGroups);
     } catch (e) {
       return Left(CacheFailure('获取照片分组失败'));
@@ -34,7 +52,7 @@ class PhotoRepositoryImpl implements IPhotoRepository {
   @override
   Future<Either<Failure, void>> deletePhotos(List<String> photoIds) async {
     try {
-      await localDataSource.deleteMockPhotos(photoIds);
+      await localDataSource.deleteCachedPhotos(photoIds);
       return Right(null);
     } catch (e) {
       return Left(CacheFailure('删除照片失败'));
