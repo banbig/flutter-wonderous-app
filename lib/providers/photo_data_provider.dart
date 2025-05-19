@@ -22,49 +22,22 @@ class PhotoDataProvider extends ChangeNotifier {
   List<Photo> get allPhotosKeptAfterCleaning => _allPhotosKeptAfterCleaning;
 
   Future<void> loadPhotosFromDevice() async {
-    List<Photo> allPhotos = [];
-    if (kIsWeb) {
-      // Web暂不支持本地文件批量读取
+    // 统一所有端逻辑：多选图片文件（不递归目录），异步处理
+    final result = await FilePicker.platform.pickFiles(
+      allowMultiple: true,
+      type: FileType.image,
+      dialogTitle: '请选择图片文件',
+      initialDirectory: '/Users/', // 可选，指定初始目录
+    );
+    if (result != null && result.files.isNotEmpty) {
+      // 先清空分组并立即刷新UI，提示正在导入
       _photoGroups = [];
       notifyListeners();
-      return;
-    }
-    if (Platform.isAndroid || Platform.isIOS) {
-      // 移动端：读取系统相册
-      final PermissionState ps = await PhotoManager.requestPermissionExtend();
-      if (!ps.isAuth) {
-        _photoGroups = [];
-        notifyListeners();
-        return;
-      }
-      final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(type: RequestType.image);
-      for (final album in albums) {
-        final List<AssetEntity> assets = await album.getAssetListPaged(page: 0, size: 100);
-        for (final asset in assets) {
-          final file = await asset.file;
-          if (file == null) continue;
-          final stat = await file.stat();
-          allPhotos.add(Photo(
-            id: asset.id,
-            url: file.path,
-            size: stat.size / 1024 / 1024,
-            name: p.basename(file.path),
-            clarity: _randomAttr(),
-            exposure: _randomAttr(),
-            faces: _randomFaces(),
-            composition: _randomAttr(),
-            colorfulness: _randomAttr(),
-          ));
-        }
-      }
-    } else {
-      // 桌面端：多选图片
-      final result = await FilePicker.platform.pickFiles(
-        allowMultiple: true,
-        type: FileType.image,
-      );
-      if (result != null && result.files.isNotEmpty) {
+      // 后台异步处理文件，避免主线程卡顿
+      Future(() async {
+        List<Photo> allPhotos = [];
         for (final f in result.files) {
+          if (f.path == null) continue;
           final file = File(f.path!);
           final stat = await file.stat();
           allPhotos.add(Photo(
@@ -79,19 +52,20 @@ class PhotoDataProvider extends ChangeNotifier {
             colorfulness: _randomAttr(),
           ));
         }
-      }
+        // 按日期分组
+        Map<String, List<Photo>> groupMap = {};
+        for (final photo in allPhotos) {
+          String date = await _getPhotoDate(photo);
+          groupMap.putIfAbsent(date, () => []).add(photo);
+        }
+        _photoGroups = groupMap.entries
+            .map((e) => PhotoGroup(date: e.key, photos: e.value))
+            .toList()
+          ..sort((a, b) => b.date.compareTo(a.date));
+        notifyListeners();
+      });
+      return;
     }
-    // 按日期分组
-    Map<String, List<Photo>> groupMap = {};
-    for (final photo in allPhotos) {
-      String date = await _getPhotoDate(photo);
-      groupMap.putIfAbsent(date, () => []).add(photo);
-    }
-    _photoGroups = groupMap.entries
-        .map((e) => PhotoGroup(date: e.key, photos: e.value))
-        .toList()
-      ..sort((a, b) => b.date.compareTo(a.date));
-    notifyListeners();
   }
 
   Future<String> _getPhotoDate(Photo photo) async {
