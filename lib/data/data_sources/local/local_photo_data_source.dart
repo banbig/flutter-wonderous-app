@@ -1,10 +1,12 @@
 import '../../../domain/entities/photo_group.dart';
 import '../../../domain/entities/photo.dart';
 import 'dart:math';
+import '../../../domain/use_cases/photo_acquisition/scan_device_photos_use_case.dart';
 
 abstract class LocalPhotoDataSource {
   Future<List<PhotoGroup>> getMockPhotoGroups();
   Future<void> deleteMockPhotos(List<String> photoIds);
+  Future<List<Photo>> fetchPhotosFromDevice();
 }
 
 class LocalPhotoDataSourceImpl implements LocalPhotoDataSource {
@@ -26,6 +28,13 @@ class LocalPhotoDataSourceImpl implements LocalPhotoDataSource {
       group.photos.removeWhere((photo) => photoIds.contains(photo.id));
     }
     _mockGroups.removeWhere((group) => group.photos.isEmpty);
+  }
+
+  @override
+  Future<List<Photo>> fetchPhotosFromDevice() async {
+    final useCase = ScanDevicePhotosUseCase(PhotoGalleryService());
+    final result = await useCase.call(NoParams());
+    return result.fold((l) => [], (r) => r);
   }
 
   List<PhotoGroup> _loadMockData() {

@@ -65,7 +65,9 @@ class ClusteringScreen extends StatelessWidget {
               children: [
                 Text('已选 ${provider.selectedPhotoIds.length} 张'),
                 ElevatedButton(
-                  onPressed: null, // MVP4暂不实现清理
+                  onPressed: provider.selectedPhotoIds.isNotEmpty && !provider.isLoading
+                      ? () => provider.performCleanup(context)
+                      : null,
                   child: Text('立即清理'),
                 ),
               ],

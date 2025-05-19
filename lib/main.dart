@@ -12,26 +12,43 @@ import 'pages/clustering_page.dart';
 import 'pages/recommended_page.dart';
 import 'pages/settings_page.dart';
 import 'widgets/bottom_nav_bar.dart';
-// import 'presentation/screens/main_screen.dart';
 import 'presentation/providers/settings_view_provider.dart';
 import 'presentation/providers/clustering_view_provider.dart';
 import 'data/data_sources/local/local_settings_data_source.dart';
 import 'data/data_sources/local/local_photo_data_source.dart';
 import 'data/repositories_impl/settings_repository_impl.dart';
 import 'data/repositories_impl/photo_repository_impl.dart';
+import 'domain/use_cases/collection_management/get_photo_recommendations_use_case.dart';
+import 'presentation/screens/main_screen.dart';
+import 'domain/use_cases/storage_management/cleanup_photos_use_case.dart';
 
 void main() {
   final localSettingsDataSource = LocalSettingsDataSourceImpl();
   final settingsRepository = SettingsRepositoryImpl(localDataSource: localSettingsDataSource);
   final localPhotoDataSource = LocalPhotoDataSourceImpl();
   final photoRepository = PhotoRepositoryImpl(localDataSource: localPhotoDataSource);
+  final getPhotoRecommendationsUseCase = GetPhotoRecommendationsUseCase();
+  final cleanupPhotosUseCase = CleanupPhotosUseCase(photoRepository);
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
         ChangeNotifierProvider(create: (_) => SettingsViewProvider(repository: settingsRepository)),
-        ChangeNotifierProvider(create: (_) => ClusteringViewProvider(photoRepository: photoRepository)),
+        ChangeNotifierProxyProvider2<SettingsViewProvider, NavigationProvider, ClusteringViewProvider>(
+          create: (_) => ClusteringViewProvider(
+            photoRepository: photoRepository,
+            getPhotoRecommendationsUseCase: getPhotoRecommendationsUseCase,
+            settingsProvider: SettingsViewProvider(repository: settingsRepository),
+            cleanupPhotosUseCase: cleanupPhotosUseCase,
+          ),
+          update: (_, settingsProvider, __, previous) => ClusteringViewProvider(
+            photoRepository: photoRepository,
+            getPhotoRecommendationsUseCase: getPhotoRecommendationsUseCase,
+            settingsProvider: settingsProvider,
+            cleanupPhotosUseCase: cleanupPhotosUseCase,
+          ),
+        ),
         ChangeNotifierProvider(create: (_) => PhotoDataProvider()),
         ChangeNotifierProvider(create: (_) => RecommendationSettingsProvider()),
       ],
@@ -51,7 +68,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Inter',
         scaffoldBackgroundColor: Color(0xFFF3F4F6),
       ),
-      home: MainScaffold(),
+      home: MainScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
