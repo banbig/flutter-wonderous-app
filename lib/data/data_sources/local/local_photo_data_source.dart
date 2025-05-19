@@ -92,6 +92,8 @@ class LocalPhotoDataSourceImpl implements LocalPhotoDataSource {
             faces: random.nextInt(3),
             composition: random.nextDouble(),
             colorfulness: random.nextDouble(),
+            recommendationScore: 0.0,
+            isBestCandidate: false,
           );
         }),
       );

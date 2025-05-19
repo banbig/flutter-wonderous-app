@@ -1,5 +1,5 @@
 import 'package:sqflite/sqflite.dart';
-import '../../../domain/entities/photo.dart';
+import '../../../../domain/entities/photo.dart';
 
 class PhotoDao {
   final Database db;

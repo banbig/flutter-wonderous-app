@@ -23,6 +23,8 @@ class ScanDevicePhotosUseCase implements UseCase<List<Photo>, NoParams> {
         faces: 0,
         composition: 0.5,
         colorfulness: 0.5,
+        recommendationScore: 0.0,
+        isBestCandidate: false,
       )).toList();
       return Right(photos);
     } catch (e) {
