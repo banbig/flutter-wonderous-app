@@ -3,6 +3,7 @@ import '../../../core/usecase/usecase.dart';
 import '../../entities/photo.dart';
 import '../../entities/photo_group.dart';
 import '../photo_analysis/calculate_similarity_use_case.dart';
+import '../../entities/similarity_pair.dart';
 import 'package:dartz/dartz.dart';
 
 class ClusterParams {

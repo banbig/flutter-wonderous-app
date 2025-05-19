@@ -5,6 +5,8 @@ import 'package:dartz/dartz.dart';
 import '../data_sources/local/local_photo_data_source.dart';
 import '../../domain/use_cases/photo_analysis/calculate_similarity_use_case.dart';
 import '../../domain/use_cases/collection_management/cluster_similar_photos_use_case.dart';
+import '../../domain/entities/photo.dart';
+import '../../domain/entities/similarity_pair.dart';
 
 class PhotoRepositoryImpl implements IPhotoRepository {
   final LocalPhotoDataSource localDataSource;
@@ -34,9 +36,9 @@ class PhotoRepositoryImpl implements IPhotoRepository {
       final similarityUseCase = CalculateSimilarityUseCase();
       final clusterUseCase = ClusterSimilarPhotosUseCase();
       final similarityResult = await similarityUseCase.call(photos);
-      final similarityData = similarityResult.fold((l) => [], (r) => r);
+      final similarityData = similarityResult.fold((l) => <SimilarityPair>[], (r) => r as List<SimilarityPair>);
       final clusterResult = await clusterUseCase.call(ClusterParams(photos: photos, similarityData: similarityData));
-      final photoGroups = clusterResult.fold((l) => [], (r) => r);
+      final photoGroups = clusterResult.fold((l) => <PhotoGroup>[], (r) => r as List<PhotoGroup>);
       // 推荐分数和最佳标记
       for (var group in photoGroups) {
         // 这里可注入GetPhotoRecommendationsUseCase

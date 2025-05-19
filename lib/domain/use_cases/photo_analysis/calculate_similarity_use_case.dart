@@ -1,15 +1,9 @@
 import '../../../core/error/failures.dart';
 import '../../../core/usecase/usecase.dart';
 import '../../entities/photo.dart';
+import '../../entities/similarity_pair.dart';
 import 'package:dartz/dartz.dart';
 import 'dart:math';
-
-class SimilarityPair {
-  final Photo photoA;
-  final Photo photoB;
-  final double score;
-  SimilarityPair({required this.photoA, required this.photoB, required this.score});
-}
 
 class CalculateSimilarityUseCase implements UseCase<List<SimilarityPair>, List<Photo>> {
   @override

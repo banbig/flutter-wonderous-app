@@ -4,8 +4,7 @@ import 'dart:math';
 import '../../../domain/use_cases/photo_acquisition/scan_device_photos_use_case.dart';
 import '../../../core/platform_services/photo_gallery_service.dart';
 import '../../../core/usecase/usecase.dart';
-import 'db/app_database.dart';
-import 'db/photo_dao.dart';
+// import 'db/photo_dao.dart';
 
 abstract class LocalPhotoDataSource {
   Future<List<PhotoGroup>> getMockPhotoGroups();
@@ -47,30 +46,22 @@ class LocalPhotoDataSourceImpl implements LocalPhotoDataSource {
 
   @override
   Future<void> cachePhotos(List<Photo> photos) async {
-    final db = await AppDatabase().database;
-    final dao = PhotoDao(db);
-    await dao.insertPhotos(photos);
+    throw UnimplementedError('cachePhotos is not implemented for desktop/isar migration');
   }
 
   @override
   Future<List<Photo>> getCachedPhotos() async {
-    final db = await AppDatabase().database;
-    final dao = PhotoDao(db);
-    return await dao.getAllPhotos();
+    throw UnimplementedError('getCachedPhotos is not implemented for desktop/isar migration');
   }
 
   @override
   Future<void> updateCachedPhoto(Photo photo) async {
-    final db = await AppDatabase().database;
-    final dao = PhotoDao(db);
-    await dao.updatePhoto(photo);
+    throw UnimplementedError('updateCachedPhoto is not implemented for desktop/isar migration');
   }
 
   @override
   Future<void> deleteCachedPhotos(List<String> ids) async {
-    final db = await AppDatabase().database;
-    final dao = PhotoDao(db);
-    await dao.deletePhotos(ids);
+    throw UnimplementedError('deleteCachedPhotos is not implemented for desktop/isar migration');
   }
 
   List<PhotoGroup> _loadMockData() {
