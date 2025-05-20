@@ -107,20 +107,12 @@ class ClusteringViewProvider extends ChangeNotifier {
     if (selectedPhotoIds.isEmpty) return;
     isLoading = true;
     notifyListeners();
-    final result = await cleanupPhotosUseCase.call(
-      CleanupPhotosParams(photoIdsToClean: selectedPhotoIds.toList()),
+    _photoDataProvider?.cleanSelectedPhotos(selectedPhotoIds);
+    selectedPhotoIds.clear();
+    await fetchPhotoGroups(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('清理成功')),
     );
-    result.fold((failure) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('清理失败：${failure.message}')),
-      );
-    }, (_) async {
-      selectedPhotoIds.clear();
-      await fetchPhotoGroups(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('清理成功')),
-      );
-    });
     isLoading = false;
     notifyListeners();
   }

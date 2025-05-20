@@ -111,13 +111,32 @@ class PhotoDataProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void cleanSelectedPhotos() {
-    _logger.d('调用 cleanSelectedPhotos');
+  void cleanSelectedPhotos(Set<String> photoIds) {
+    _logger.d('待删除的照片ID: $photoIds');
     for (var group in _photoGroups) {
-      group.photos.removeWhere((photo) => _selectedPhotos.contains(photo.id));
+      _logger.d('分组${group.id} 初始照片数: ${group.photos.length}');
+      group.photos.removeWhere((photo) {
+        if (photoIds.contains(photo.id)) {
+          _logger.d('准备删除: ${photo.url}');
+          try {
+            final file = File(photo.url);
+            _logger.d('尝试删除文件: ${photo.url}');
+            if (file.existsSync()) {
+              file.deleteSync();
+              _logger.d('已删除: ${photo.url}');
+            } else {
+              _logger.w('文件不存在: ${photo.url}');
+            }
+          } catch (e) {
+            _logger.w('删除文件失败: ${photo.url}, error: $e');
+          }
+          return true;
+        }
+        return false;
+      });
+      _logger.d('分组${group.id} 删除后照片数: ${group.photos.length}');
     }
     _allPhotosKeptAfterCleaning = _photoGroups.expand((g) => g.photos).toList();
-    _selectedPhotos.clear();
     notifyListeners();
   }
 

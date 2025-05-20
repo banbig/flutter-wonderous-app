@@ -221,8 +221,27 @@ class ClusteringScreen extends StatelessWidget {
                             child: ElevatedButton(
                               onPressed: totalSelected == 0
                                   ? null
-                                  : () {
-                                      clusteringProvider.performCleanup(context);
+                                  : () async {
+                                      final confirm = await showDialog<bool>(
+                                        context: context,
+                                        builder: (ctx) => AlertDialog(
+                                          title: Text('确认清除'),
+                                          content: Text('确定要清除选中的照片吗？此操作不可恢复。'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.of(ctx).pop(false),
+                                              child: Text('取消'),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () => Navigator.of(ctx).pop(true),
+                                              child: Text('确认'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                      if (confirm == true) {
+                                        await clusteringProvider.performCleanup(context);
+                                      }
                                     },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.transparent,
