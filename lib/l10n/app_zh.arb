@@ -1,41 +1,59 @@
 {
-  "settingsTitle": "设置",
-  "recommendationCriteria": "推荐标准设置",
-  "recommendationMode": "推荐模式",
-  "singleBest": "单张最佳",
-  "topN": "Top-N",
-  "topNValue": "Top-N 数量",
-  "clarity": "清晰度",
-  "exposure": "曝光",
-  "faces": "人脸数",
-  "composition": "构图",
-  "colorfulness": "色彩丰富度",
-  "applySettings": "应用设置",
-  "smartSelectDefault": "智能选择默认开启",
-  "language": "语言",
-  "chinese": "简体中文",
-  "english": "英文",
-  "version": "版本号",
-  "home": "首页",
-  "album": "相册",
-  "clustering": "清理",
-  "recommend": "推荐",
-  "settings": "设置",
+  "@@locale": "zh",
   "dashboardTitle": "首页",
-  "dashboardAppName": "极简照片管家",
-  "dashboardSlogan": "智能管理，释放空间",
-  "dashboardScanAndClean": "开始扫描与清理",
-  "dashboardLastScan": "上次扫描：{date}",
-  "dashboardOptimizable": "预计可优化：{size}",
-  "albumTitle": "相册",
-  "albumImport": "导入本地照片",
-  "albumEmpty": "暂无照片，请点击右上角\"导入\"按钮导入本地照片",
-  "cleanTitle": "相似照片清理",
-  "cleanFoundGroups": "发现 {groupCount} 组, 共 {photoCount} 张照片",
-  "cleanSelected": "已选 {selectedCount} 张, 共 {selectedSize} MB",
-  "cleanDone": "清理完成！已移除选中照片。",
+  "dashboardAppName": "Wonderous 照片应用",
+  "dashboardSlogan": "AI 驱动的照片管理",
+  "dashboardScanAndClean": "扫描并清理",
+  
+  "cleanTitle": "清理照片",
+  "cleanFoundGroups": "{count, plural, =0{未找到任何组} =1{1个组, {total}张照片} other{{count}个组, {total}张照片}}",
+  "@cleanFoundGroups": {
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      },
+      "total": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "cleanSelected": "{count, plural, =0{未选择任何照片} =1{已选择1张照片, {size} MB} other{已选择{count}张照片, {size} MB}}",
+  "@cleanSelected": {
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "cleanNow": "立即清理",
-  "recommendTitle": "推荐照片",
-  "recommendEmpty": "暂无推荐照片，请先完成一次清理操作。",
-  "recommendDesc": "根据当前推荐标准，为您保留的照片如下："
+  
+  "settingsTitle": "设置",
+  "settingsRecommendationMode": "推荐模式",
+  "settingsSingleBestMode": "单张最佳",
+  "settingsSingleBestDesc": "仅保留每组照片中最好的一张",
+  "settingsTopNMode": "多张最佳",
+  "settingsTopNDesc": "保留每组照片中多张最佳照片",
+  "settingsKeepCount": "保留数量",
+  "settingsCriteria": "选择标准",
+  "settingsClarity": "清晰度",
+  "settingsClarityDesc": "照片的锐度和对焦质量",
+  "settingsExposure": "曝光",
+  "settingsExposureDesc": "照片的曝光是否恰当",
+  "settingsFaces": "人脸",
+  "settingsFacesDesc": "照片中是否包含人脸",
+  "settingsComposition": "构图",
+  "settingsCompositionDesc": "照片的整体构图质量",
+  "settingsColorfulness": "色彩丰富度",
+  "settingsColorfulnessDesc": "照片色彩的丰富程度",
+  "settingsReset": "重置为默认值",
+  
+  "clustering": "清理",
+  "home": "首页",
+  "settings": "设置"
 }

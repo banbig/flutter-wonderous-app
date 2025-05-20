@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../domain/entities/photo_group.dart';
-import '../domain/entities/photo.dart';
-import '../domain/entities/recommendation_settings.dart';
-import 'photo_card_widget.dart';
+import 'package:flutter_wonderous_app/features/photo_cleanup/domain/entities/photo_group.dart';
+import 'package:flutter_wonderous_app/features/photo_cleanup/domain/entities/photo.dart';
+import 'package:flutter_wonderous_app/features/settings/domain/entities/recommendation_settings.dart';
 import 'package:intl/intl.dart';
+import 'photo_card_widget.dart';
 
 class PhotoGroupWidget extends StatelessWidget {
   final PhotoGroup group;
@@ -69,4 +69,4 @@ class PhotoGroupWidget extends StatelessWidget {
       ),
     );
   }
-} 
+}

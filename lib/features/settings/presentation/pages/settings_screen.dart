@@ -21,7 +21,7 @@ class SettingsScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
-          localizations.settingsTitle, 
+          localizations.settingsTitle ?? "设置", 
           style: AppStyles.headline
         ),
         centerTitle: true,
@@ -42,11 +42,11 @@ class SettingsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(localizations.settingsRecommendationMode, style: AppStyles.subtitle),
+                    Text(localizations.settingsRecommendationMode ?? "推荐模式", style: AppStyles.subtitle),
                     const SizedBox(height: 16),
                     RadioListTile<RecommendationMode>(
-                      title: Text(localizations.settingsSingleBestMode),
-                      subtitle: Text(localizations.settingsSingleBestDesc, style: AppStyles.caption),
+                      title: Text(localizations.settingsSingleBestMode ?? "单张最佳"),
+                      subtitle: Text(localizations.settingsSingleBestDesc ?? "选择每组照片中最好的一张", style: AppStyles.caption),
                       value: RecommendationMode.singleBest,
                       groupValue: provider.settings.mode,
                       onChanged: (val) => provider.updateMode(val!),
@@ -54,8 +54,8 @@ class SettingsScreen extends StatelessWidget {
                       contentPadding: EdgeInsets.zero,
                     ),
                     RadioListTile<RecommendationMode>(
-                      title: Text(localizations.settingsTopNMode),
-                      subtitle: Text(localizations.settingsTopNDesc, style: AppStyles.caption),
+                      title: Text(localizations.settingsTopNMode ?? "多张最佳"),
+                      subtitle: Text(localizations.settingsTopNDesc ?? "选择每组照片中多张最佳照片", style: AppStyles.caption),
                       value: RecommendationMode.topN,
                       groupValue: provider.settings.mode,
                       onChanged: (val) => provider.updateMode(val!),
@@ -67,7 +67,7 @@ class SettingsScreen extends StatelessWidget {
                         padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
                         child: Row(
                           children: [
-                            Text(localizations.settingsKeepCount),
+                            Text(localizations.settingsKeepCount ?? "保留数量"),
                             Expanded(
                               child: Slider(
                                 value: provider.settings.topNValue.toDouble(),
@@ -88,7 +88,7 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            Text(localizations.settingsCriteria, style: AppStyles.subtitle),
+            Text(localizations.settingsCriteria ?? "选择标准", style: AppStyles.subtitle),
             const SizedBox(height: 8),
             // 标准列表
             Card(
@@ -102,40 +102,40 @@ class SettingsScreen extends StatelessWidget {
                     _buildCriteriaItem(
                       context,
                       key: 'clarity',
-                      title: localizations.settingsClarity,
-                      subtitle: localizations.settingsClarityDesc,
+                      title: localizations.settingsClarity ?? "清晰度",
+                      subtitle: localizations.settingsClarityDesc ?? "照片的锐度和对焦质量",
                       provider: provider,
                     ),
                     const Divider(),
                     _buildCriteriaItem(
                       context,
                       key: 'exposure',
-                      title: localizations.settingsExposure,
-                      subtitle: localizations.settingsExposureDesc,
+                      title: localizations.settingsExposure ?? "曝光",
+                      subtitle: localizations.settingsExposureDesc ?? "照片的曝光是否恰当",
                       provider: provider,
                     ),
                     const Divider(),
                     _buildCriteriaItem(
                       context,
                       key: 'faces',
-                      title: localizations.settingsFaces,
-                      subtitle: localizations.settingsFacesDesc,
+                      title: localizations.settingsFaces ?? "人脸",
+                      subtitle: localizations.settingsFacesDesc ?? "照片中是否包含人脸",
                       provider: provider,
                     ),
                     const Divider(),
                     _buildCriteriaItem(
                       context,
                       key: 'composition',
-                      title: localizations.settingsComposition,
-                      subtitle: localizations.settingsCompositionDesc,
+                      title: localizations.settingsComposition ?? "构图",
+                      subtitle: localizations.settingsCompositionDesc ?? "照片的整体构图质量",
                       provider: provider,
                     ),
                     const Divider(),
                     _buildCriteriaItem(
                       context,
                       key: 'colorfulness',
-                      title: localizations.settingsColorfulness,
-                      subtitle: localizations.settingsColorfulnessDesc,
+                      title: localizations.settingsColorfulness ?? "色彩丰富度",
+                      subtitle: localizations.settingsColorfulnessDesc ?? "照片色彩的丰富程度",
                       provider: provider,
                     ),
                   ],
@@ -151,7 +151,7 @@ class SettingsScreen extends StatelessWidget {
                   side: BorderSide(color: AppColors.primary),
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                 ),
-                child: Text(localizations.settingsReset),
+                child: Text(localizations.settingsReset ?? "重置为默认值"),
               ),
             ),
             const SizedBox(height: 40),

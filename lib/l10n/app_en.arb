@@ -1,41 +1,59 @@
 {
-  "settingsTitle": "Settings",
-  "recommendationCriteria": "Recommendation Criteria",
-  "recommendationMode": "Recommendation Mode",
-  "singleBest": "Single Best",
-  "topN": "Top-N",
-  "topNValue": "Top-N Value",
-  "clarity": "Clarity",
-  "exposure": "Exposure",
-  "faces": "Faces",
-  "composition": "Composition",
-  "colorfulness": "Colorfulness",
-  "applySettings": "Apply Settings",
-  "smartSelectDefault": "Smart Select Default On",
-  "language": "Language",
-  "chinese": "Chinese",
-  "english": "English",
-  "version": "Version",
-  "home": "Home",
-  "album": "Album",
-  "clustering": "Clustering",
-  "recommend": "Recommend",
-  "settings": "Settings",
-  "dashboardTitle": "Home",
+  "@@locale": "en",
+  "dashboardTitle": "Dashboard",
   "dashboardAppName": "Wonderous Photo App",
-  "dashboardSlogan": "Smart management, free up space",
-  "dashboardScanAndClean": "Scan and Clean",
-  "dashboardLastScan": "Last scan: {date}",
-  "dashboardOptimizable": "Optimizable: {size}",
-  "albumTitle": "Album",
-  "albumImport": "Import Local Photos",
-  "albumEmpty": "No photos yet, please click the import button in the top right to add photos.",
-  "cleanTitle": "Similar Photo Cleanup",
-  "cleanFoundGroups": "{groupCount} groups found, {photoCount} photos in total",
-  "cleanSelected": "{selectedCount} selected, {selectedSize} MB in total",
-  "cleanDone": "Cleanup complete! Selected photos removed.",
+  "dashboardSlogan": "AI-Powered Photo Management",
+  "dashboardScanAndClean": "Scan & Clean",
+  
+  "cleanTitle": "Clean Photos",
+  "cleanFoundGroups": "{count, plural, =0{No group found} =1{1 group, {total} photos} other{{count} groups, {total} photos}}",
+  "@cleanFoundGroups": {
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      },
+      "total": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "cleanSelected": "{count, plural, =0{No photo selected} =1{1 photo selected, {size} MB} other{{count} photos selected, {size} MB}}",
+  "@cleanSelected": {
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "cleanNow": "Clean Now",
-  "recommendTitle": "Recommended Photos",
-  "recommendEmpty": "No recommended photos, please complete a cleanup first.",
-  "recommendDesc": "Photos kept for you based on the current recommendation criteria:"
+  
+  "settingsTitle": "Settings",
+  "settingsRecommendationMode": "Recommendation Mode",
+  "settingsSingleBestMode": "Single Best",
+  "settingsSingleBestDesc": "Keep only the best photo from each group",
+  "settingsTopNMode": "Top N",
+  "settingsTopNDesc": "Keep multiple best photos from each group",
+  "settingsKeepCount": "Keep Count",
+  "settingsCriteria": "Criteria",
+  "settingsClarity": "Clarity",
+  "settingsClarityDesc": "Sharpness and focus quality of the photo",
+  "settingsExposure": "Exposure",
+  "settingsExposureDesc": "Is the photo properly exposed",
+  "settingsFaces": "Faces",
+  "settingsFacesDesc": "Whether the photo contains faces",
+  "settingsComposition": "Composition",
+  "settingsCompositionDesc": "Overall composition quality of the photo",
+  "settingsColorfulness": "Colorfulness",
+  "settingsColorfulnessDesc": "Variety and vividness of colors in the photo",
+  "settingsReset": "Reset to Defaults",
+  
+  "clustering": "Clean",
+  "home": "Home",
+  "settings": "Settings"
 }

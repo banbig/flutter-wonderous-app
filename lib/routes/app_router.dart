@@ -23,8 +23,8 @@ class AppRouter {
   };
   
   // 路由生成器
-  static Route<dynamic> generateRoute(RouteSettings settings) {
-    switch (settings.name) {
+  static Route<dynamic> generateRoute(RouteSettings routeSettings) {
+    switch (routeSettings.name) {
       case dashboard:
         return MaterialPageRoute(builder: (_) => const DashboardScreen());
       case photoCleanup:
@@ -35,7 +35,7 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => Scaffold(
             body: Center(
-              child: Text('未找到路由: ${settings.name}'),
+              child: Text('未找到路由: ${routeSettings.name}'),
             ),
           ),
         );
