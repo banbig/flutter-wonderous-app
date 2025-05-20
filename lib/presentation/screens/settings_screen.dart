@@ -27,143 +27,202 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     Locale currentLocale = Localizations.localeOf(context);
-    return Consumer<SettingsViewProvider>(
-      builder: (context, provider, _) {
-        final RecommendationSettings settings = provider.settings;
-        _topNController.text = settings.topNValue.toString();
-        return Scaffold(
-          appBar: AppBar(title: Text(localizations.settingsTitle)),
-          body: Form(
-            key: _formKey,
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(localizations.recommendationCriteria, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 16),
-                        DropdownButtonFormField<RecommendationMode>(
-                          value: settings.mode,
-                          decoration: InputDecoration(labelText: localizations.recommendationMode),
-                          items: [
-                            DropdownMenuItem(
-                              value: RecommendationMode.singleBest,
-                              child: Text(localizations.singleBest),
-                            ),
-                            DropdownMenuItem(
-                              value: RecommendationMode.topN,
-                              child: Text(localizations.topN),
-                            ),
-                          ],
-                          onChanged: (v) {
-                            if (v != null) provider.setMode(v);
-                          },
+    final settingsProvider = Provider.of<SettingsViewProvider>(context);
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text(localizations.settingsTitle, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.black87)),
+        centerTitle: true,
+      ),
+      body: Container(
+        color: const Color(0xFFF3F6FA),
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 24),
+          children: [
+            Center(
+              child: Card(
+                elevation: 10,
+                shadowColor: const Color(0x1A000000),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 28),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(localizations.recommendationCriteria, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF232B3B))),
+                      const SizedBox(height: 4),
+                      Text('调整各项参数的权重，找到最适合你的推荐标准。', style: TextStyle(fontSize: 14, color: Color(0xFF8A94A6), fontWeight: FontWeight.w400)),
+                      const SizedBox(height: 18),
+                      DropdownButtonFormField<RecommendationMode>(
+                        value: settingsProvider.settings.mode,
+                        decoration: InputDecoration(
+                          labelText: localizations.recommendationMode,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Color(0xFF6A7BFF))),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         ),
-                        if (settings.mode == RecommendationMode.topN)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 12.0),
-                            child: TextFormField(
-                              controller: _topNController,
-                              decoration: InputDecoration(labelText: localizations.topNValue),
-                              keyboardType: TextInputType.number,
-                              validator: (val) {
-                                final n = int.tryParse(val ?? '');
-                                if (n == null || n < 1) {
-                                  return localizations.topNValue;
-                                }
-                                return null;
-                              },
-                              onChanged: (val) {
-                                final n = int.tryParse(val) ?? 1;
-                                provider.setTopNValue(n);
-                              },
-                            ),
+                        icon: Icon(Icons.keyboard_arrow_down, color: Color(0xFF6A7BFF)),
+                        dropdownColor: Colors.white,
+                        style: const TextStyle(fontSize: 15, color: Color(0xFF232B3B)),
+                        items: [
+                          DropdownMenuItem(
+                            value: RecommendationMode.singleBest,
+                            child: Text(localizations.singleBest),
                           ),
-                        const SizedBox(height: 16),
-                        ...settings.criteria.keys.map((key) {
-                          final criterion = settings.criteria[key]!;
-                          return SettingsCriteriaItemWidget(
-                            label: _criterionName(key, localizations),
-                            enabled: criterion.enabled,
-                            weight: criterion.weight,
-                            onEnabledChanged: (v) => provider.setCriterionEnabled(key, v),
-                            onWeightChanged: (v) => provider.setCriterionWeight(key, v),
-                          );
-                        }).toList(),
-                        const SizedBox(height: 16),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              if (_formKey.currentState!.validate()) {
-                                await provider.saveSettings();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(localizations.applySettings)),
-                                );
+                          DropdownMenuItem(
+                            value: RecommendationMode.topN,
+                            child: Text(localizations.topN),
+                          ),
+                        ],
+                        onChanged: (v) {
+                          if (v != null) settingsProvider.setMode(v);
+                        },
+                      ),
+                      if (settingsProvider.settings.mode == RecommendationMode.topN)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10.0),
+                          child: TextFormField(
+                            controller: _topNController,
+                            decoration: InputDecoration(
+                              labelText: localizations.topNValue,
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            ),
+                            keyboardType: TextInputType.number,
+                            style: const TextStyle(fontSize: 15),
+                            validator: (val) {
+                              final n = int.tryParse(val ?? '');
+                              if (n == null || n < 1) {
+                                return localizations.topNValue;
+                              }
+                              return null;
+                            },
+                            onChanged: (val) {
+                              final n = int.tryParse(val) ?? 1;
+                              settingsProvider.setTopNValue(n);
+                            },
+                          ),
+                        ),
+                      const SizedBox(height: 18),
+                      ...settingsProvider.settings.criteria.keys.map((key) {
+                        final criterion = settingsProvider.settings.criteria[key]!;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          child: Row(
+                            children: [
+                              Checkbox(
+                                value: criterion.enabled,
+                                onChanged: (v) => settingsProvider.setCriterionEnabled(key, v ?? false),
+                                activeColor: Color(0xFF6A7BFF),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              Expanded(
+                                child: Text(_criterionName(key, localizations), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+                              ),
+                              SizedBox(
+                                width: 180,
+                                child: SliderTheme(
+                                  data: SliderTheme.of(context).copyWith(
+                                    activeTrackColor: Color(0xFF6A7BFF),
+                                    inactiveTrackColor: Color(0xFFDFE3F5),
+                                    thumbColor: Color(0xFF6A7BFF),
+                                    overlayColor: Color(0x336A7BFF),
+                                    trackHeight: 4,
+                                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                                  ),
+                                  child: Slider(
+                                    value: criterion.weight,
+                                    min: 0,
+                                    max: 1,
+                                    divisions: 10,
+                                    onChanged: criterion.enabled
+                                        ? (v) => settingsProvider.setCriterionWeight(key, v)
+                                        : null,
+                                  ),
+                                ),
+                              ),
+                              Text(criterion.weight.toStringAsFixed(1), style: const TextStyle(fontSize: 14, color: Color(0xFF6A7BFF), fontWeight: FontWeight.w600)),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Center(
+              child: Card(
+                elevation: 8,
+                shadowColor: const Color(0x1A000000),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 28),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('应用设置', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF232B3B))),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('智能选择默认开启', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                              Text('自动判断并优先选择最佳照片', style: TextStyle(fontSize: 13, color: Color(0xFF8A94A6))),
+                            ],
+                          ),
+                          Switch(
+                            value: settingsProvider.settings.smartSelectDefaultEnabled,
+                            onChanged: (v) => settingsProvider.setSmartSelectDefaultEnabled(v),
+                            activeColor: Color(0xFF6A7BFF),
+                          ),
+                        ],
+                      ),
+                      const Divider(height: 32),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('语言', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                          DropdownButton<Locale>(
+                            value: currentLocale,
+                            items: [
+                              DropdownMenuItem(
+                                value: const Locale('zh', 'CN'),
+                                child: Text('简体中文'),
+                              ),
+                              DropdownMenuItem(
+                                value: const Locale('en', 'US'),
+                                child: Text('English'),
+                              ),
+                            ],
+                            onChanged: (locale) {
+                              if (locale != null) {
+                                context.read<LocaleProvider>().setLocale(locale);
                               }
                             },
-                            child: Text(localizations.applySettings),
+                            style: const TextStyle(fontSize: 15, color: Color(0xFF232B3B)),
+                            borderRadius: BorderRadius.circular(12),
+                            icon: Icon(Icons.keyboard_arrow_down, color: Color(0xFF6A7BFF)),
+                            dropdownColor: Colors.white,
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  child: ListTile(
-                    title: Text(localizations.smartSelectDefault),
-                    trailing: Switch(value: true, onChanged: (_) {}),
-                  ),
-                ),
-                Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.language),
-                        const SizedBox(width: 12),
-                        Text(localizations.language),
-                        const Spacer(),
-                        DropdownButton<Locale>(
-                          value: currentLocale,
-                          items: [
-                            DropdownMenuItem(
-                              value: const Locale('zh', 'CN'),
-                              child: Text(localizations.chinese),
-                            ),
-                            DropdownMenuItem(
-                              value: const Locale('en', 'US'),
-                              child: Text(localizations.english),
-                            ),
-                          ],
-                          onChanged: (locale) {
-                            if (locale != null) {
-                              context.read<LocaleProvider>().setLocale(locale);
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Card(
-                  child: ListTile(
-                    title: Text(localizations.version),
-                    subtitle: const Text('1.0.0'),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        );
-      },
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
     );
   }
 

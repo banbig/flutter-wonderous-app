@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/photo_data_provider.dart';
-import '../../models/photo_group.dart';
-import '../../models/photo.dart';
+import '../../domain/entities/photo_group.dart';
+import '../../domain/entities/photo.dart';
 import '../../widgets/photo_group_widget.dart';
 import '../../presentation/providers/settings_view_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -13,6 +13,7 @@ class ClusteringScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('ClusteringScreen build');
     final localizations = AppLocalizations.of(context)!;
     final photoProvider = context.watch<PhotoDataProvider>();
     final settings = context.watch<SettingsViewProvider>().settings;
@@ -36,7 +37,16 @@ class ClusteringScreen extends StatelessWidget {
         color: const Color(0xFFF3F6FA),
         child: Consumer<ClusteringViewProvider>(
           builder: (context, clusteringProvider, _) {
+            print('Consumer rebuild: isSmartSelectEnabled = \x1b[32m"+clusteringProvider.isSmartSelectEnabled+"\x1b[0m');
             final isSmartSelectEnabled = clusteringProvider.isSmartSelectEnabled;
+            final selected = clusteringProvider.selectedPhotoIds;
+            final groups = clusteringProvider.displayedGroups;
+            final totalPhotos = groups.fold<int>(0, (sum, g) => sum + g.photos.length);
+            final totalSelected = selected.length;
+            final totalSelectedSize = groups
+                .expand((g) => g.photos)
+                .where((p) => selected.contains(p.id))
+                .fold<double>(0, (sum, p) => sum + p.size);
             return Column(
               children: [
                 Padding(
@@ -51,7 +61,10 @@ class ClusteringScreen extends StatelessWidget {
                           const SizedBox(width: 6),
                           Switch(
                             value: isSmartSelectEnabled,
-                            onChanged: (v) => clusteringProvider.setSmartSelectEnabled(v),
+                            onChanged: (v) {
+                              print('Switch onChanged: $v');
+                              clusteringProvider.setSmartSelectEnabled(v);
+                            },
                             activeColor: Color(0xFF6A7BFF),
                           ),
                         ],
@@ -77,9 +90,9 @@ class ClusteringScreen extends StatelessWidget {
                             selectedPhotoIds: selected,
                             settings: settings,
                             onPhotoSelect: (photoId, selected) {
-                              photoProvider.selectPhoto(photoId, selected);
+                              clusteringProvider.togglePhotoSelection(photoId);
                             },
-                            getBestPhotos: (photos) => photoProvider.getBestPhotosInGroup(photos, settings),
+                            getBestPhotos: (photos, [s]) => clusteringProvider.getBestPhotosInGroup(photos, s ?? settings),
                           ),
                         ),
                       );
@@ -115,10 +128,7 @@ class ClusteringScreen extends StatelessWidget {
                               onPressed: totalSelected == 0
                                   ? null
                                   : () {
-                                      photoProvider.cleanSelectedPhotos();
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(localizations.cleanDone)),
-                                      );
+                                      clusteringProvider.performCleanup(context);
                                     },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.transparent,

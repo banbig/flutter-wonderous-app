@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/photo.dart';
+import '../domain/entities/photo.dart';
 import 'dart:io';
 
 class PhotoCardWidget extends StatelessWidget {

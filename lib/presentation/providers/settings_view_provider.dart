@@ -17,6 +17,13 @@ class SettingsViewProvider extends ChangeNotifier {
   bool isCriterionEnabled(String key) => _settings.criteria[key]?.enabled ?? false;
   double getCriterionWeight(String key) => _settings.criteria[key]?.weight ?? 0.0;
 
+  bool get smartSelectDefaultEnabled => _settings.smartSelectDefaultEnabled;
+  void setSmartSelectDefaultEnabled(bool value) {
+    _settings.smartSelectDefaultEnabled = value;
+    saveSettings();
+    notifyListeners();
+  }
+
   Future<void> loadSettings() async {
     final result = await repository.getRecommendationSettings();
     result.fold((failure) {

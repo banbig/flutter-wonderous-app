@@ -39,10 +39,10 @@ void main() {
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
         ChangeNotifierProvider(create: (_) => SettingsViewProvider(repository: settingsRepository)),
         ChangeNotifierProxyProvider2<SettingsViewProvider, NavigationProvider, ClusteringViewProvider>(
-          create: (_) => ClusteringViewProvider(
+          create: (context) => ClusteringViewProvider(
             photoRepository: photoRepository,
             getPhotoRecommendationsUseCase: getPhotoRecommendationsUseCase,
-            settingsProvider: SettingsViewProvider(repository: settingsRepository),
+            settingsProvider: Provider.of<SettingsViewProvider>(context, listen: false),
             cleanupPhotosUseCase: cleanupPhotosUseCase,
           ),
           update: (_, settingsProvider, __, previous) => ClusteringViewProvider(
@@ -60,7 +60,7 @@ void main() {
           return MaterialApp(
             title: 'Wonderous Photo App',
             theme: ThemeData(
-              primarySwatch: Colors.blue,
+              colorSchemeSeed: Colors.blue,
               useMaterial3: true,
               fontFamily: 'Inter',
               scaffoldBackgroundColor: Color(0xFFF3F4F6),

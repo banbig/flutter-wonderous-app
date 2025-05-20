@@ -1,28 +1,45 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/photo_group.dart';
-import '../../domain/repositories/i_photo_repository.dart';
+import '../../domain/entities/photo.dart';
 import '../../domain/entities/recommendation_settings.dart';
+import '../../domain/repositories/i_photo_repository.dart';
 import '../../domain/use_cases/collection_management/get_photo_recommendations_use_case.dart';
 import '../providers/settings_view_provider.dart';
 import '../../domain/use_cases/storage_management/cleanup_photos_use_case.dart';
+import 'package:logger/logger.dart';
 
 class ClusteringViewProvider extends ChangeNotifier {
   final IPhotoRepository photoRepository;
   final GetPhotoRecommendationsUseCase getPhotoRecommendationsUseCase;
   final SettingsViewProvider settingsProvider;
   final CleanupPhotosUseCase cleanupPhotosUseCase;
+  final Logger _logger = Logger();
   ClusteringViewProvider({
     required this.photoRepository,
     required this.getPhotoRecommendationsUseCase,
     required this.settingsProvider,
     required this.cleanupPhotosUseCase,
-  });
+  }) {
+    _logger.i('ClusteringViewProvider 构造: 初始化并同步 SettingsViewProvider');
+    syncSmartSelectWithSettings();
+  }
+
+  @override
+  void dispose() {
+    _logger.i('ClusteringViewProvider dispose');
+    super.dispose();
+  }
 
   bool isLoading = false;
   String? error;
   List<PhotoGroup> displayedGroups = [];
   Set<String> selectedPhotoIds = {};
   bool isSmartSelectEnabled = false;
+
+  void syncSmartSelectWithSettings() {
+    _logger.i('syncSmartSelectWithSettings: settingsProvider.smartSelectDefaultEnabled = $isSmartSelectEnabled');
+    isSmartSelectEnabled = settingsProvider.smartSelectDefaultEnabled;
+  }
 
   Future<void> fetchPhotoGroups() async {
     isLoading = true;
@@ -76,8 +93,12 @@ class ClusteringViewProvider extends ChangeNotifier {
   }
 
   void setSmartSelectEnabled(bool value) {
+    print('Provider setSmartSelectEnabled: $value');
+    _logger.i('setSmartSelectEnabled: value = $value');
     isSmartSelectEnabled = value;
+    settingsProvider.setSmartSelectDefaultEnabled(value);
     applySmartSelection();
+    notifyListeners();
   }
 
   Future<void> performCleanup(BuildContext context) async {
@@ -100,5 +121,16 @@ class ClusteringViewProvider extends ChangeNotifier {
     });
     isLoading = false;
     notifyListeners();
+  }
+
+  List<Photo> getBestPhotosInGroup(List<Photo> photos, RecommendationSettings settings) {
+    List<Photo> sorted = List.from(photos);
+    sorted.sort((a, b) => (b.recommendationScore ?? 0).compareTo(a.recommendationScore ?? 0));
+    if (settings.mode == RecommendationMode.singleBest) {
+      return sorted.isNotEmpty ? [sorted.first] : [];
+    } else {
+      int n = settings.topNValue.clamp(1, 5);
+      return sorted.take(n).toList();
+    }
   }
 } 

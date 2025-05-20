@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import '../models/photo_group.dart';
-import '../models/photo.dart';
+import '../domain/entities/photo_group.dart';
+import '../domain/entities/photo.dart';
 import '../domain/entities/recommendation_settings.dart';
 import 'photo_card_widget.dart';
+import 'package:intl/intl.dart';
 
 class PhotoGroupWidget extends StatelessWidget {
   final PhotoGroup group;
   final Set<String> selectedPhotoIds;
   final RecommendationSettings settings;
   final void Function(String photoId, bool selected) onPhotoSelect;
-  final List<Photo> Function(List<Photo> photos) getBestPhotos;
+  final List<Photo> Function(List<Photo> photos, [RecommendationSettings? settings]) getBestPhotos;
 
   const PhotoGroupWidget({
     Key? key,
@@ -22,7 +23,7 @@ class PhotoGroupWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bestPhotos = getBestPhotos(group.photos);
+    final bestPhotos = getBestPhotos(group.photos, settings);
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 1,
@@ -35,7 +36,7 @@ class PhotoGroupWidget extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(group.date, style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(DateFormat('yyyy-MM-dd').format(group.date), style: const TextStyle(fontWeight: FontWeight.bold)),
                 Text('共${group.photos.length}张', style: const TextStyle(color: Colors.grey)),
               ],
             ),
