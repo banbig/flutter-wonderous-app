@@ -5,6 +5,11 @@ import '../../providers/navigation_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../providers/clustering_view_provider.dart';
 
+// 页面索引常量
+const int kDashboardPageIndex = 0;
+const int kClusteringPageIndex = 1;
+const int kSettingsPageIndex = 2;
+
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({Key? key}) : super(key: key);
 
@@ -73,8 +78,8 @@ class DashboardScreen extends StatelessWidget {
                           ),
                           onPressed: () async {
                             await Provider.of<PhotoDataProvider>(context, listen: false).loadPhotosFromDevice();
-                            await Provider.of<ClusteringViewProvider>(context, listen: false).fetchPhotoGroups();
-                            Provider.of<NavigationProvider>(context, listen: false).setPage(2);
+                            await Provider.of<ClusteringViewProvider>(context, listen: false).fetchPhotoGroups(context);
+                            Provider.of<NavigationProvider>(context, listen: false).setPage(kClusteringPageIndex);
                           },
                           child: Text(localizations.dashboardScanAndClean, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
                         ),

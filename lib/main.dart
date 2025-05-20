@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'models/photo.dart';
-import 'models/photo_group.dart';
 import 'providers/navigation_provider.dart';
 import 'providers/photo_data_provider.dart';
 import 'widgets/bottom_nav_bar.dart';
@@ -23,6 +21,8 @@ import 'presentation/screens/clustering_screen.dart';
 import 'presentation/screens/recommended_screen.dart';
 import 'presentation/screens/settings_screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
   Logger.level = Level.debug;
@@ -58,6 +58,7 @@ void main() {
       child: Consumer<LocaleProvider>(
         builder: (context, localeProvider, child) {
           return MaterialApp(
+            navigatorKey: navigatorKey,
             title: 'Wonderous Photo App',
             theme: ThemeData(
               colorSchemeSeed: Colors.blue,
@@ -88,13 +89,14 @@ void main() {
 class MainScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final photoDataProvider = Provider.of<PhotoDataProvider>(context, listen: false);
+    final clusteringViewProvider = Provider.of<ClusteringViewProvider>(context, listen: false);
+    clusteringViewProvider.photoDataProvider = photoDataProvider;
     final currentIndex = Provider.of<NavigationProvider>(context, listen: true).currentPageIndex;
     final List<Widget> screens = [
-      DashboardScreen(),
-      // AlbumScreen(), // 移除相册页面
-      ClusteringScreen(),
-      RecommendedScreen(),
-      SettingsScreen(),
+      DashboardScreen(),    // 首页
+      ClusteringScreen(),   // 清理
+      SettingsScreen(),     // 设置
     ];
     return Scaffold(
       body: IndexedStack(

@@ -2,7 +2,7 @@ class Photo {
   final String id;
   final String url;
   final String name;
-  final double size;
+  final double size; // 单位MB
   final DateTime? dateTimeOriginal;
   final double? latitude;
   final double? longitude;

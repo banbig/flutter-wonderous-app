@@ -7,6 +7,8 @@ import '../../domain/use_cases/collection_management/get_photo_recommendations_u
 import '../providers/settings_view_provider.dart';
 import '../../domain/use_cases/storage_management/cleanup_photos_use_case.dart';
 import 'package:logger/logger.dart';
+import '../../providers/photo_data_provider.dart';
+import 'package:provider/provider.dart';
 
 class ClusteringViewProvider extends ChangeNotifier {
   final IPhotoRepository photoRepository;
@@ -32,28 +34,28 @@ class ClusteringViewProvider extends ChangeNotifier {
 
   bool isLoading = false;
   String? error;
-  List<PhotoGroup> displayedGroups = [];
   Set<String> selectedPhotoIds = {};
   bool isSmartSelectEnabled = false;
+  PhotoDataProvider? _photoDataProvider;
+
+  set photoDataProvider(PhotoDataProvider provider) {
+    _photoDataProvider = provider;
+  }
+
+  List<PhotoGroup> get displayedGroups => _photoDataProvider?.photoGroups ?? [];
 
   void syncSmartSelectWithSettings() {
     _logger.i('syncSmartSelectWithSettings: settingsProvider.smartSelectDefaultEnabled = $isSmartSelectEnabled');
     isSmartSelectEnabled = settingsProvider.smartSelectDefaultEnabled;
   }
 
-  Future<void> fetchPhotoGroups() async {
+  Future<void> fetchPhotoGroups(BuildContext context) async {
     isLoading = true;
     error = null;
     notifyListeners();
-    final result = await photoRepository.getPhotoGroups(settings: settingsProvider.settings);
-    result.fold((failure) {
-      error = failure.message;
-      displayedGroups = [];
-    }, (groups) async {
-      displayedGroups = groups;
-      await _applyRecommendationToGroups();
-      applySmartSelection();
-    });
+    final photoDataProvider = Provider.of<PhotoDataProvider>(context, listen: false);
+    await _applyRecommendationToGroups();
+    applySmartSelection();
     isLoading = false;
     notifyListeners();
   }
@@ -114,7 +116,7 @@ class ClusteringViewProvider extends ChangeNotifier {
       );
     }, (_) async {
       selectedPhotoIds.clear();
-      await fetchPhotoGroups();
+      await fetchPhotoGroups(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('清理成功')),
       );

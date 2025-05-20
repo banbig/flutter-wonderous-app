@@ -31,10 +31,6 @@ class BottomNavBar extends StatelessWidget {
           label: localizations.clustering,
         ),
         BottomNavigationBarItem(
-          icon: const Icon(Icons.recommend_outlined),
-          label: localizations.recommend,
-        ),
-        BottomNavigationBarItem(
           icon: const Icon(Icons.settings_outlined),
           label: localizations.settings,
         ),
