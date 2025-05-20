@@ -7,6 +7,7 @@ import '../../widgets/photo_group_widget.dart';
 import '../../presentation/providers/settings_view_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../presentation/providers/clustering_view_provider.dart';
+import '../providers/photo_wall_provider.dart';
 
 class ClusteringScreen extends StatelessWidget {
   const ClusteringScreen({Key? key}) : super(key: key);
@@ -97,6 +98,99 @@ class ClusteringScreen extends StatelessWidget {
                         ),
                       );
                     },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8, top: 4),
+                  child: Center(
+                    child: SizedBox(
+                      width: 340,
+                      child: ElevatedButton.icon(
+                        icon: Icon(Icons.wallpaper, color: Color(0xFF6A7BFF)),
+                        label: Text('生成照片墙', style: TextStyle(fontSize: 15, color: Color(0xFF6A7BFF), fontWeight: FontWeight.w600)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          shadowColor: Colors.transparent,
+                          foregroundColor: Color(0xFF6A7BFF),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 0,
+                        ),
+                        onPressed: selected.isEmpty
+                            ? null
+                            : () async {
+                                await showDialog(
+                                  context: context,
+                                  builder: (ctx) {
+                                    int tempPhotoCount = selected.length.clamp(1, 36);
+                                    double tempRandomness = 50.0;
+                                    return StatefulBuilder(
+                                      builder: (context, setState) {
+                                        return AlertDialog(
+                                          title: Text('照片墙参数设置'),
+                                          content: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Text('照片数量'),
+                                                  Expanded(
+                                                    child: Slider(
+                                                      value: tempPhotoCount.toDouble(),
+                                                      min: 1,
+                                                      max: selected.length.toDouble().clamp(1, 36),
+                                                      divisions: (selected.length > 1 ? selected.length - 1 : 1),
+                                                      label: tempPhotoCount.toString(),
+                                                      onChanged: (v) => setState(() => tempPhotoCount = v.round()),
+                                                    ),
+                                                  ),
+                                                  Text('$tempPhotoCount'),
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Text('布局随意度'),
+                                                  Expanded(
+                                                    child: Slider(
+                                                      value: tempRandomness,
+                                                      min: 0,
+                                                      max: 100,
+                                                      divisions: 20,
+                                                      label: tempRandomness.toStringAsFixed(0),
+                                                      onChanged: (v) => setState(() => tempRandomness = v),
+                                                    ),
+                                                  ),
+                                                  Text('${tempRandomness.toStringAsFixed(0)}'),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(context),
+                                              child: Text('取消'),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () async {
+                                                final photoWallProvider = Provider.of<PhotoWallProvider>(context, listen: false);
+                                                photoWallProvider.setPhotoCount(tempPhotoCount);
+                                                photoWallProvider.setRandomness(tempRandomness);
+                                                // 仅取选中的前N张图片
+                                                final selectedList = selected.toList().take(tempPhotoCount).toList();
+                                                await photoWallProvider.generatePhotoWall(selectedList);
+                                                Navigator.pop(context);
+                                              },
+                                              child: Text('生成'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
+                                );
+                              },
+                      ),
+                    ),
                   ),
                 ),
                 Padding(

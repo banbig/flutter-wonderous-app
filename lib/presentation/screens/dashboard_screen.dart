@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/photo_data_provider.dart';
 import '../../providers/navigation_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../providers/clustering_view_provider.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -72,6 +73,7 @@ class DashboardScreen extends StatelessWidget {
                           ),
                           onPressed: () async {
                             await Provider.of<PhotoDataProvider>(context, listen: false).loadPhotosFromDevice();
+                            await Provider.of<ClusteringViewProvider>(context, listen: false).fetchPhotoGroups();
                             Provider.of<NavigationProvider>(context, listen: false).setPage(2);
                           },
                           child: Text(localizations.dashboardScanAndClean, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, letterSpacing: 0.5)),

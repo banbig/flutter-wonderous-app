@@ -17,11 +17,6 @@ class BottomNavBar extends StatelessWidget {
           label: '首页',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.photo_album_outlined),
-          activeIcon: Icon(Icons.photo_album),
-          label: '相册',
-        ),
-        BottomNavigationBarItem(
           icon: Icon(Icons.cleaning_services_outlined),
           activeIcon: Icon(Icons.cleaning_services),
           label: '清理',

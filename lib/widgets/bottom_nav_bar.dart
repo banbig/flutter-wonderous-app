@@ -27,10 +27,6 @@ class BottomNavBar extends StatelessWidget {
           label: localizations.home,
         ),
         BottomNavigationBarItem(
-          icon: const Icon(Icons.photo_library_outlined),
-          label: localizations.album,
-        ),
-        BottomNavigationBarItem(
           icon: const Icon(Icons.cleaning_services_outlined),
           label: localizations.clustering,
         ),

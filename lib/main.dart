@@ -18,7 +18,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart';
 import 'providers/locale_provider.dart';
 import 'presentation/screens/dashboard_screen.dart';
-import 'presentation/screens/album_screen.dart';
+// import 'presentation/screens/album_screen.dart';
 import 'presentation/screens/clustering_screen.dart';
 import 'presentation/screens/recommended_screen.dart';
 import 'presentation/screens/settings_screen.dart';
@@ -91,7 +91,7 @@ class MainScaffold extends StatelessWidget {
     final currentIndex = Provider.of<NavigationProvider>(context, listen: true).currentPageIndex;
     final List<Widget> screens = [
       DashboardScreen(),
-      AlbumScreen(),
+      // AlbumScreen(), // 移除相册页面
       ClusteringScreen(),
       RecommendedScreen(),
       SettingsScreen(),
